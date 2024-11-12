@@ -1,0 +1,8 @@
+
+name: krona_ktimporttaxonomy
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::krona=2.8.1
