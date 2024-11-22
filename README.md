@@ -13,7 +13,7 @@
 
 ## Summary
 
-**Meta-ONT** is a bioinformatics workflow that accepts ONT reads as input and runs them through the following processes:
+**Meta-ONT** is optimized for long, Nanopore read and is designed to filter and denoise environmental samples to produce meaningful assemblies and identify pathogens of interests. It expects dorado trimmed, ONT reads as input and runs them through the following processes:
 
 1. _OPTIONAL_: Subsampling ([`BBMap`](https://github.com/BioInfoTools/BBMap))
 
