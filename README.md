@@ -13,48 +13,36 @@
 
 ## Summary
 
-**Long Read Analysis** is a bioinformatics workflow that accepts ONT reads as input and runs them through the following processes:
+**Meta-ONT** is a bioinformatics workflow that accepts ONT reads as input and runs them through the following processes:
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+1. _OPTIONAL_: Subsampling ([`BBMap`](https://github.com/BioInfoTools/BBMap))
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+2. Long read QC 
+     - Read Statistics/Summary ([`Nanoplot`](https://github.com/wdecoster/NanoPlot))
+     - _OPTIONAL_: Adapter trimming ([`Porechop`](https://github.com/rrwick/Porechop))
+     - Quality and Length Filtering ([`Chopper`](https://github.com/wdecoster/chopper))
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+3. Read Alignment ([`minimap2`](https://github.com/lh3/minimap2))
 
-2. Long read specific QC ([`Nanoplot`](https://github.com/wdecoster/NanoPlot))
+4. Alignment based filtering ([`samtools`](https://www.htslib.org/doc/samtools.html)) plus custom scripts
 
-3. Adapter trimming ([`Porechop`](https://github.com/rrwick/Porechop))
+5. Taxonomic Classification ([`Kraken2`](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown))
 
-4. Length based filtering ([`Chopper`](https://github.com/wdecoster/chopper))
-
-5. Read Alignment ([`minimap2`](https://github.com/lh3/minimap2))
-
-5a. Alignment based filtering ([`samtools`](https://www.htslib.org/doc/samtools.html))
-
-6. Taxonomic Classification ([`Kraken2`](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown))
-
-6a. Taxonomic Distribution Visualization ([`Krona`](https://github.com/marbl/Krona/wiki))
+6. Taxonomic Distribution Visualization ([`Krona`](https://github.com/marbl/Krona/wiki))
 
 7. Assembly with one of 3 tools:
 
-     a. [`Flye`](https://github.com/fenderglass/Flye)
+     - [`Flye`](https://github.com/fenderglass/Flye)
 
-     b. [`Megahit`](https://github.com/voutcn/megahit)
+     - [`Megahit`](https://github.com/voutcn/megahit)
 
-     c. [`Spades`](https://github.com/ablab/spades)
-          - NOTE: Spades assembler should only be used with long reads when performing a hybrid assembly
+     - [`Spades`](https://github.com/ablab/spades) - NOTE: Spades assembler should only be used with long reads when performing a hybrid assembly
 
 8. Assembly QC ([`quast`](https://github.com/ablab/quast))
 
-9. Assembly polishing ([`Medaka`](https://github.com/nanoporetech/medaka))
+9. _OPTIONAL_: Assembly polishing ([`Medaka`](https://github.com/nanoporetech/medaka))
 
-10. Polished assembly QC ([`quast`](https://github.com/ablab/quast))
+10. _OPTIONAL_: Polished assembly QC ([`quast`](https://github.com/ablab/quast))
 
 11. Binning ([`Maxbin2`](https://sourceforge.net/projects/maxbin2/))
 
@@ -65,72 +53,174 @@
 14. Workflow Summary ([`MultiQC`](https://github.com/MultiQC/MultiQC))
 
 
+## Setup
+
+This workflow uses assets and depencies native to the CDC's SciComp environment. If you do not have access to the SciComp environment, you can request an account [`here`](https://info.biotech.cdc.gov/info/helpdesk-ticket/?category=Account%20Requests). 
+
+
 ## Usage
-
-:::note
-If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
-to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
-with `-profile test` before running the workflow on actual data.
-:::
-
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
 
 First, prepare a samplesheet with your input data that looks as follows:
 
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,fastq_long
+SAMPLE_1,/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/long-reads/sample1-long-read-ont.fastq.gz
+SAMPLE_2,/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/long-reads/sample2-long-read-ont.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+The top row is the header row ("sample,fastq_long") and should never be altered. Each row below the header, represents a fastq file with a unique identifier in the "sample" column (SAMPLE_1 and SAMPLE_2 in the example above). Each fastq file needs to be gzipped/compressed to prevent validation errors from occuring at the initialization of the pipeline
 
--->
+There is an example samplesheet located under the assets folder (`assets/samplesheet.csv`) that you can view and edit yourself. **NOTE** If you use this samplesheet, please make a back up copy of it as it will be overwritten each time you pull an updated version of this repository. 
 
-Now, you can run the pipeline using this bash wrapper script:
+Once the samplesheet has been formatted, we can run the workflow using one of the 3 methods methods listed below.
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
+**Method 1: Cluster Submission**:
+
+The `qsub` method allows you to submit the job to SciComp's high memory cluster computing nodes for fast performance and load distribution. This is a good "fire and forget" method for new users who aren't as familiar with SciComp's compute environment
+
+Format:
 ```bash
-bash ./run_pipeline.sh
+bash ./run_qsub.sh --input "/path/to/samplesheet" --outdir "/path/to/output/directory" "<additional-parameters>"
 ```
 
-Alternatively, you can run the nextflow command from the command line using the given parameters at a minimum:
-
+Example:
 ```bash
-nextflow run main.nf \
-     -profile singularity,local \
-     <additional flags/parameters>
+bash ./run_qsub.sh --input "assets/samplesheet.csv" --outdir "results/test" "--skip_subsample false --num_subsamples 1000 --skip_kraken2 false"
 ```
 
-:::warning
-Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
-provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
-:::
+
+**Method 2: Local Execution**:
+
+The `local` method may be a better option if you are experiencing technical issues with the `qsub` method. `qsub` adds additonal layers of complexity to workflow execution, while `local` simply runs the workflow on your local machine or the host that you're connected to, _**provided it has sufficient memory/RAM and CPUs to execute the workflow**_
+
+Format:
+```bash
+bash ./run_local.sh --input "/path/to/samplesheet" --outdir "/path/to/output/directory" "<additional-parameters>"
+```
+
+Example:
+```bash
+bash ./run_local.sh --input "./assets/samplesheet.csv" --outdir "./results/test" "--skip_subsample false --num_subsamples 1000 --skip_kraken2 false"
+```
+
+
+**Method 3: Native Nextflow Execution**:
+
+If you are familiar with nextflow and Scicomp's computing environment, you can invoke the `nextflow` command straight from the terminal. **NOTE: if you are using this method you will need to load up a nextflow environment via `module load` or `conda`**
+ 
+Format:
+```bash
+nextflow run main.nf -profile singularity,local --input "/path/to/samplesheet" --outdir "/path/to/output/directory" \<additional flags\>
+```
+
+Example:
+```bash
+nextflow run main.nf -profile singularity,local --input "./assets/samplesheet.csv" --outdir "./results/test" --skip_subsample false --num_subsamples 1000 --skip_kraken2 false
+```
+
+
+## Parameters
+
+See below for all possible input parameters:
+
+
+**Global Variables**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--metagenomic_sample` | boolean | true |
+
+
+**Workflow processes**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--skip_subsample` | boolean | true |
+| `--skip_porechop` | boolean | true |
+| `--skip_metamaps` | boolean | true |
+| `--skip_nonpareil` | boolean | true |
+| `--skip_alignment_based_filtering` | boolean | true |
+| `--skip_fastq_screen` | boolean | true |
+| `--skip_kraken2` | boolean | true |
+| `--skip_kraken2_parse_reads_by_taxon` | boolean | true |
+| `--skip_kraken2_protein` | boolean | true |
+| `--skip_filter_by_kraken2_protein` | boolean | true |
+| `--skip_assembly` | boolean | true |
+| `--skip_medaka` | boolean | true |
+| `--skip_binning` | boolean | true |
+| `--skip_blast` | boolean | true |                       
+
+
+**BBmap subsampling parameters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--num_subsamples` | integer | 1000 |
+
+
+**Chopper quality trimming parameters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--chopper_q` | integer | 20 |
+| `--chopper_min_len` | integer | 1000 |
+| `--chopper_max_len` | integer | 2147483647 |
+
+
+**Minimap2 parameters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--minimap2_index` | string | '/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/minimap2/index/a_castellani_neff.mmi' |
+| `--minimap2_mismatch_penalty` | integer | 4 |
+| `--seq2tax_map` | string | "/scicomp/home-pure/rtq0/EMEL-GWA/Projects/Long_Read_Analysis/data/kraken-db/bact_arch_vir_fungi_amoeba-DB_41-mer/seqid2taxid.map" |
+| `--tax_ids` | string | "./assets/tax_ids_acanth-verm-naegleria.txt" |
+| `--mapping_quality` | integer | 10 |
+
+
+**MetaMaps parameters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--metamaps_db` | string | "/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/metamaps/databases/refseq_complete" |
+| `--metamaps_threads` | integer | 16 |
+| `--metamaps_mem` | integer | 120 |
+
+
+**Kraken2 parameters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--kraken_db_main` | string | "/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/kraken-db/bact_arch_vir_fungi_amoeba-DB_41-mer" |
+| `--kraken_db_protein` | string | "/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/kraken-db/protein_alanine_tRNA_ligase" |
+| `--kraken_tax_ids` | string | "./assets/tax_ids_acanth-verm-naegleria.txt" |
+| `--kraken_custom_params` | string | "" |
+
+**FastqScreen parameters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--fastq_screen_conf` | string | "./assets/fastq_screen.conf" |
+
+
+**Assembler paramaters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--assembler` | string | 'flye' |
+
+
+**BLAST parameters**:
+| Parameter | Data Type | Default Value |
+|:---------:|:---------:|:-------------:|
+| `--blast_db` | string | "/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/blast/arch-bact-fung-hum-amoeba_refseq/arch-bact-fung-hum-amoeba_refseq" |
+| `--blast_evalue` | string | "1e-10" |
+| `--blast_perc_identity` | string | "95" |
+| `--blast_target_seqs` | string | "5" |
 
 ## Credits
 
-scicomp/nfcoreskeleton was originally written by scicomp.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+Meta-ONT was originally written by Sam Rusher (rtq0@cdc.gov).
 
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
 ## Citations
-
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use  scicomp/nfcoreskeleton for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
 This pipeline uses code and infrastructure developed and maintained by the [nf-core](https://nf-co.re) community, reused here under the [MIT license](https://github.com/nf-core/tools/blob/master/LICENSE).
 

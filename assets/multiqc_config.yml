@@ -11,13 +11,32 @@ report_section_order:
 
 export_plots: true
 
+disable_version_detection: true
+data_format: "yaml"
+
 fn_clean_exts:
   - "_T1"
+  - "NanoStats.txt"
+  - "_NanoStats_trimmed.txt"
+
+run_modules:
+  - nanostat
+  - samtools
+  - kraken
+  - quast
 
 ## Module order
 top_modules:
-  - "nanostat"
+  - "nanostat":
+      name: "NanoPlot: Raw Reads"
+      path_filters_exclude:
+        - "*trimmed*"
+  - "nanostat":
+      name: "NanoPlot: Post Trimming"
+      path_filters:
+        - "*trimmed*"
   - "nonpareil"
+  - "samtools"
   - "kraken"
   - "quast"
 
@@ -26,6 +45,8 @@ module_order:
       name: "NanoPlot"
   - nonpareil:
       name: "Nonpareil"
+  - samtools:
+      name: "Samtools"
   - kraken:
       name: "Kraken2"
   - quast:
