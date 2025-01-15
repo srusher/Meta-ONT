@@ -57,17 +57,18 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2_MAIN                } from '../modules/nf-c
 include { KRAKEN2_KRAKEN2 as KRAKEN2_PROTEIN             } from '../modules/nf-core/kraken2/kraken2/main'
 include { KRONA_KRONADB                                  } from '../modules/nf-core/krona/krona_db/main'
 include { KRAKENTOOLS_KREPORT2KRONA                      } from '../modules/nf-core/krakentools/kreport2krona/main'
+include { KRAKENTOOLS_EXTRACTKRAKENREADS                 } from '../modules/nf-core/krakentools/extractkrakenreads/main'
 include { KRONA_KTIMPORTTEXT as KRONA_KRAKEN             } from '../modules/nf-core/krona/ktimporttext/main'
 include { KRONA_KTIMPORTTEXT as KRONA_METAMAPS           } from '../modules/nf-core/krona/ktimporttext/main'
 include { FLYE                                           } from '../modules/nf-core/flye/main'
 include { MEGAHIT                                        } from '../modules/nf-core/megahit/main'
 include { MINIMAP2_ALIGN as ALIGN_READS                  } from '../modules/nf-core/minimap2/main'
-include { MINIMAP2_ALIGN as ALIGN_READS_AGAIN            } from '../modules/nf-core/minimap2/main'
-include { MINIMAP2_ALIGN as ALIGN_ASSEMBLY               } from '../modules/nf-core/minimap2/main'
+include { SAMTOOLS_DEPTH                                 } from '../modules/nf-core/samtools/depth/main'
 include { SAMTOOLS_INDEX                                 } from '../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_SORT                                  } from '../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_COVERAGE                              } from '../modules/nf-core/samtools/coverage/main'
 include { MEDAKA                                         } from '../modules/nf-core/medaka/main'
 include { MAXBIN2                                        } from '../modules/nf-core/maxbin2/main'
+include { CHECKM2_PREDICT                                } from '../modules/nf-core/checkm2/predict/main'
 include { BUSCO_BUSCO                                    } from '../modules/nf-core/busco/busco/main'
 include { MULTIQC                                        } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS                    } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -76,30 +77,29 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS                    } from '../modules/nf-c
 //
 // MODULE: custom, local modules
 //
-include { NANOPLOT as NANOPLOT_RAW                     } from '../modules/local/nanoplot'
-include { NANOPLOT as NANOPLOT_TRIMMED                 } from '../modules/local/nanoplot'
-include { NANOPLOT as NANOPLOT_TRIMMED_FILTERED        } from '../modules/local/nanoplot'
-include { METAMAPS                                     } from '../modules/local/metamaps'
-include { RENAME_KRAKEN_READS                          } from '../modules/local/rename_kraken_reads'
-include { FASTQSCREEN                                  } from '../modules/local/fastq_screen'
-include { CLASSIFIER_COMPARISON_GRAPH                  } from '../modules/local/classifier_comparison_graph'
-include { SAMTOOLS_STATS                               } from '../modules/local/samtools_stats'
-include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_UNMAPPED    } from '../modules/local/samtools_fastq'
-include { ALIGNMENT_CLASSIFY                           } from '../modules/local/alignment_classify'
-include { SAMTOOLS_VIEW as SAMTOOLS_QUALITY_FILTER     } from '../modules/local/samtools_view'
-include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_MAPPED      } from '../modules/local/samtools_fastq'
-include { BBMAP_REFORMAT as BBMAP_REFORMAT_SUBSAMPLE   } from '../modules/local/bbmap_reformat_subsample'
-include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_UNMAPPED       } from '../modules/local/bbmap_reformat'
-include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_MAPPED    } from '../modules/local/bbmap_reformat'
-include { PARSE_READS_BY_TAXON                         } from '../modules/local/parse_reads_by_taxon'
-include { SPADES                                       } from '../modules/local/spades'
-include { UNZIP                                        } from '../modules/local/unzip'
-include { UNZIP as UNZIP_POLISHED                      } from '../modules/local/unzip'
-include { ZIP                                          } from '../modules/local/zip'
-include { QUAST                                        } from '../modules/local/quast'
-include { QUAST as QUAST_MEDAKA                        } from '../modules/local/quast'
-include { BLAST_BLASTN                                 } from '../modules/local/blastn'
-include { BLAST_MEGABLAST as MEGABLAST                 } from '../modules/local/megablast'
+include { NANOPLOT as NANOPLOT_RAW                        } from '../modules/local/nanoplot'
+include { NANOPLOT as NANOPLOT_TRIMMED                    } from '../modules/local/nanoplot'
+include { NANOPLOT as NANOPLOT_KRAKEN_TAXON_FILTERED      } from '../modules/local/nanoplot'
+include { NANOPLOT as NANOPLOT_ALIGNMENT_TAXON_FILTERED   } from '../modules/local/nanoplot'
+include { METAMAPS                                        } from '../modules/local/metamaps'
+include { FASTQSCREEN                                     } from '../modules/local/fastq_screen'
+include { CLASSIFIER_COMPARISON_GRAPH                     } from '../modules/local/classifier_comparison_graph'
+include { SAMTOOLS_STATS                                  } from '../modules/local/samtools_stats'
+include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_UNMAPPED       } from '../modules/local/samtools_fastq'
+include { ALIGNMENT_CLASSIFY                              } from '../modules/local/alignment_classify'
+include { SAMTOOLS_VIEW as SAMTOOLS_QUALITY_FILTER        } from '../modules/local/samtools_view'
+include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_MAPPED         } from '../modules/local/samtools_fastq'
+include { BBMAP_REFORMAT as BBMAP_REFORMAT_SUBSAMPLE      } from '../modules/local/bbmap_reformat_subsample'
+include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_UNMAPPED } from '../modules/local/bbmap_reformat'
+include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_MAPPED   } from '../modules/local/bbmap_reformat'
+include { PARSE_READS_BY_TAXON                            } from '../modules/local/parse_reads_by_taxon'
+include { SPADES                                          } from '../modules/local/spades'
+include { UNZIP                                           } from '../modules/local/unzip'
+include { UNZIP as UNZIP_POLISHED                         } from '../modules/local/unzip'
+include { ZIP                                             } from '../modules/local/zip'
+include { QUAST                                           } from '../modules/local/quast'
+include { QUAST as QUAST_MEDAKA                           } from '../modules/local/quast'
+include { BLAST_BLASTN                                    } from '../modules/local/blastn'
 
 
 /*
@@ -127,7 +127,7 @@ workflow LONGREADANALYSIS {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
 
-    if (params.subsample) {
+    if (!params.skip_subsample) {
 
         BBMAP_REFORMAT_SUBSAMPLE (
             INPUT_CHECK.out.reads,
@@ -224,12 +224,6 @@ workflow LONGREADANALYSIS {
 
         )
 
-        SAMTOOLS_STATS (
-
-            ALIGN_READS.out.bam
-
-        )
-
         // capturing all unaligned reads and converting back into a fastq
         SAMTOOLS_FASTQ_UNMAPPED (
 
@@ -250,7 +244,32 @@ workflow LONGREADANALYSIS {
 
             ALIGN_READS.out.bam,
             params.seq2tax_map,
-            params.tax_ids
+            params.my_tax_ids,
+            params.include_children
+
+        )
+
+        SAMTOOLS_STATS (
+
+            ALIGNMENT_CLASSIFY.out.bam
+
+        )
+
+        SAMTOOLS_DEPTH (
+
+            ALIGNMENT_CLASSIFY.out.bam
+
+        )
+
+        SAMTOOLS_INDEX (
+
+            ALIGNMENT_CLASSIFY.out.bam
+
+        )
+
+        SAMTOOLS_COVERAGE (
+
+            ALIGNMENT_CLASSIFY.out.bam.join(SAMTOOLS_INDEX.out.bai)
 
         )
 
@@ -281,7 +300,7 @@ workflow LONGREADANALYSIS {
         filtered_reads = BBMAP_REFORMAT_CLEAN_MAPPED.out.fastq
 
         // running nanoplot again to compare read stat pre and post filter
-        NANOPLOT_TRIMMED_FILTERED (
+        NANOPLOT_ALIGNMENT_TAXON_FILTERED (
 
             filtered_reads
 
@@ -297,7 +316,7 @@ workflow LONGREADANALYSIS {
     if (!params.skip_metamaps) {
 
         METAMAPS (
-            filtered_reads,
+            CHOPPER.out.fastq,
             params.metamaps_db
         )
 
@@ -308,10 +327,10 @@ workflow LONGREADANALYSIS {
         
         KRAKEN2_MAIN (
 
-            filtered_reads,
+            CHOPPER.out.fastq,
             params.kraken_db_main,
             true,
-            false
+            true
 
         )
 
@@ -329,7 +348,7 @@ workflow LONGREADANALYSIS {
 
         // contaminant screenin and limited taxonmic profiling with fastqscreen
         FASTQSCREEN (
-            filtered_reads,
+            CHOPPER.out.fastq,
             params.fastq_screen_conf
         )
 
@@ -346,17 +365,25 @@ workflow LONGREADANALYSIS {
 
     }
 
-    // parse out reads classified under a designated tax ID for further analyses
-    if (params.parse_reads_by_taxon && !params.skip_kraken2) {
+    // parse out reads classified under a designated tax ID
+    if (!params.skip_kraken2_parse_reads_by_taxon && !params.skip_kraken2) {
 
-        PARSE_READS_BY_TAXON (
+        KRAKENTOOLS_EXTRACTKRAKENREADS (
 
+            params.kraken_tax_ids,
+            KRAKEN2_MAIN.out.classified_reads_assignment,
             KRAKEN2_MAIN.out.classified_reads_fastq,
-            params.kraken_tax_ids
+            KRAKEN2_MAIN.out.report
 
         )
 
-        filtered_reads = PARSE_READS_BY_TAXON.out.taxon_reads
+        NANOPLOT_KRAKEN_TAXON_FILTERED (
+
+            KRAKENTOOLS_EXTRACTKRAKENREADS.out.extracted_kraken2_reads
+
+        )
+
+        filtered_reads = KRAKENTOOLS_EXTRACTKRAKENREADS.out.extracted_kraken2_reads
 
     }
 
@@ -373,193 +400,146 @@ workflow LONGREADANALYSIS {
 
     }
 
-    if (params.filter_by_protein && !params.skip_kraken2_protein) {
+    if (!params.skip_filter_by_kraken2_protein && !params.skip_kraken2_protein) {
 
         filtered_reads = KRAKEN2_PROTEIN.out.classified_reads_fastq
 
     }
+
+    if (!params.skip_assembly) {
     
-    if (params.assembler == "spades") {
+        if (params.assembler == "spades") {
+            
+            spades_map = filtered_reads.map { meta, fastq -> [ meta, [], [], fastq ] }
+
+            contigs_produced = true
+
+            SPADES (
+
+                spades_map,
+                [],
+                [],         
+
+            )
+
+            assembly_ch = SPADES.out.contigs
+
+        } else if (params.assembler == "flye") {
+
+            FLYE (
+
+                filtered_reads,
+                '--nano-hq'
+
+            )
+
+            assembly_ch = FLYE.out.fasta
+
+        } else if (params.assembler == "megahit") {
+
+            MEGAHIT (
+
+                filtered_reads
+
+            )
+
+            assembly_ch = MEGAHIT.out.contigs
         
-        spades_map = filtered_reads.map { meta, fastq -> [ meta, [], [], fastq ] }
+        }
 
-        contigs_produced = true
-
-        SPADES (
-
-            spades_map,
-            [],
-            [],         
-
-        )
-
-        assembly_ch = SPADES.out.contigs
-
-    } else if (params.assembler == "flye") {
-
-        FLYE (
-
-            filtered_reads,
-            '--nano-hq'
-
-        )
-
-        assembly_ch = FLYE.out.fasta
-
-    } else if (params.assembler == "megahit") {
-
-        MEGAHIT (
-
-            filtered_reads
-
-        )
-
-        assembly_ch = MEGAHIT.out.contigs
-    
-    }
-
-    UNZIP (
-
-        assembly_ch
-
-    )
-
-    unzip_channel = UNZIP.out.unzip_contigs
-
-
-    // if (params.use_minimap2) {
-
-
-    //     ALIGN_ASSEMBLY (
-
-    //         filtered_reads,
-    //         unzip_channel,
-    //         true,
-    //         false,
-    //         false
-
-    //     )
-
-    //     // samtools steps below are only needed if using metabat2 for binning
-    //     // SAMTOOLS_SORT (
-
-    //     //     ALIGN_ASSEMBLY.out.bam,
-    //     //     unzip_channel
-
-    //     // )
-
-    //     // SAMTOOLS_INDEX (
-
-    //     //     SAMTOOLS_SORT.out.bam
-
-    //     // )
-
-
-    // }
-
-
-    //assembly qc with quast
-    QUAST (
-
-        unzip_channel, // consensus (one or more assemblies)
-
-    )
-
-
-    if (!params.skip_medaka) {
-
-        medaka_input = filtered_reads.join(unzip_channel)
-
-        //polishing contigs with medaka
-        MEDAKA (
-
-            medaka_input
-
-        )
-
-        assembly_ch = MEDAKA.out.assembly
-
-        QUAST_MEDAKA (
-
-            assembly_ch
-
-        )
-    
-        //generated unzipped version of the spades contigs
-        UNZIP_POLISHED (
+        UNZIP (
 
             assembly_ch
 
         )
 
-        unzip_channel = UNZIP_POLISHED.out.unzip_contigs
-
-    }
-
-    if (!params.skip_binning) {
-
-        maxbin_map = unzip_channel.join(filtered_reads)
-
-        MAXBIN2 (
-
-            maxbin_map
-
-        )
-
-        // metabat2_sum_input_ch = SAMTOOLS_SORT.out.bam.join(SAMTOOLS_INDEX.out.bai)
-
-        // METABAT2_JGISUMMARIZEBAMCONTIGDEPTHS (
-
-        //     metabat2_sum_input_ch
-
-        // )
-
-        // metabat2_metabat2_input_ch = unzip_channel.join(METABAT2_JGISUMMARIZEBAMCONTIGDEPTHS.out.depth)
-
-        // METABAT2_METABAT2 (
-
-        //     metabat2_metabat2_input_ch
-
-        // )
+        unzip_channel = UNZIP.out.unzip_contigs
 
 
-        // CHECKM_LINEAGEWF (
+        //assembly qc with quast
+        QUAST (
 
-        //     MAXBIN2.out.binned_fastas,
-        //     "fasta.gz",
-        //     []
-
-        // )
-
-        BUSCO_BUSCO (
-
-            MAXBIN2.out.binned_fastas,
-            "genome",
-            "bacteria_odb10",
-            [],
-            []
+            unzip_channel, // consensus (one or more assemblies)
 
         )
 
 
+        if (!params.skip_medaka) {
+
+            medaka_input = filtered_reads.join(unzip_channel)
+
+            //polishing contigs with medaka
+            MEDAKA (
+
+                medaka_input
+
+            )
+
+            assembly_ch = MEDAKA.out.assembly
+
+            QUAST_MEDAKA (
+
+                assembly_ch
+
+            )
+        
+            //generated unzipped version of the spades contigs
+            UNZIP_POLISHED (
+
+                assembly_ch
+
+            )
+
+            unzip_channel = UNZIP_POLISHED.out.unzip_contigs
+
+        }
+
+        if (!params.skip_binning) {
+
+            maxbin_map = unzip_channel.join(filtered_reads)
+
+            MAXBIN2 (
+
+                maxbin_map
+
+            )
+
+            if (params.bin_QC == "checkm") {
+
+                CHECKM2_PREDICT (
+
+                    MAXBIN2.out.binned_fastas,
+                    [["checkm2-DB"],["${params.checkm2_db}"]]
+
+                )
+
+            } else {
+
+                BUSCO_BUSCO (
+
+                    MAXBIN2.out.binned_fastas,
+                    "genome",
+                    "bacteria_odb10",
+                    [],
+                    []
+
+                )
+            
+            }
+
+
+        }
+
+        if (!params.skip_blast) {
+
+            BLAST_BLASTN (
+                unzip_channel,
+                params.blast_db
+            )
+
+        }
     }
-
-    if (!params.skip_blast) {
-
-        BLAST_BLASTN (
-            unzip_channel,
-            params.blast_db
-        )
-
-        // MEGABLAST (
-
-        //     unzip_channel,
-        //     params.blast_standard_db
-
-        // )
-
-    }
-
+    
     // CUSTOM_DUMPSOFTWAREVERSIONS (
     //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
     // )
@@ -581,13 +561,19 @@ workflow LONGREADANALYSIS {
     // ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
-    //ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_RAW.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_RAW.out.txt.collect{it[1]}.ifEmpty([]))
     if (!params.skip_porechop) {
         ch_multiqc_files = ch_multiqc_files.mix(PORECHOP_PORECHOP.out.log.collect().ifEmpty([]))
     }
     
     if (!params.skip_nonpareil) {
         ch_multiqc_files = ch_multiqc_files.mix(NONPAREIL_NONPAREILCURVESR.out.mqc_json.collect().ifEmpty([]))
+    }
+
+    if (!params.skip_alignment_based_filtering) {
+        ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS.out.txt.map{it[1]})
+        ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_DEPTH.out.tsv.map{it[1]})
+        ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_COVERAGE.out.coverage.map{it[1]})
     }
 
     ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_TRIMMED.out.txt.collect{it[1]}.ifEmpty([]))
@@ -597,11 +583,11 @@ workflow LONGREADANALYSIS {
     
     if (!params.skip_medaka) {
         ch_multiqc_files = ch_multiqc_files.mix(QUAST_MEDAKA.out.report.collect().ifEmpty([]))
-    } else {
+    } else if (!params.skip_assembly) {
         ch_multiqc_files = ch_multiqc_files.mix(QUAST.out.report.collect().ifEmpty([]))
     }
 
-    if (!params.skip_binning) {
+    if (!params.skip_binning && params.bin_QC != "checkm" ) {
         ch_multiqc_files = ch_multiqc_files.mix(BUSCO_BUSCO.out.short_summaries_multiqc.collect().ifEmpty([]))
     }
 
