@@ -29,15 +29,17 @@ fi
 # Clearing temp directory
 rm -rf $SCRIPTDIR/../temp/*
 
-# creating log directory
+# creating output directories
 mkdir $SCRIPTDIR/../temp/logs
+mkdir $SCRIPTDIR/../temp/segments
+mkdir $SCRIPTDIR/../temp/ids
 
 LOGFILE="$SCRIPTDIR/../temp/logs/log.txt"
+
 
 # Clearing log file
 >$LOGFILE
 
-OUTPUTFILE=""              # Placeholder for the output file
 SHUFFLED_LIST="$SCRIPTDIR/../temp/shuffled_list"
 
 # Get the total number of lines in the input file
@@ -55,12 +57,16 @@ sort -R $nodes_file > $SHUFFLED_LIST
 # Loop through 10 chunks
 for i in $(seq 1 $num_groups); do
 
-    # Define the output file for this chunk
-    OUTPUTFILE=$SCRIPTDIR/../temp/lines_$start-$fin
-    >$OUTPUTFILE
+    # Define the input file for this chunk
+    nodes_segement="$SCRIPTDIR/../temp/segments/lines_$start-$fin"
+    >$nodes_segement
+
+    # define output file for this chunk
+    output_file="$SCRIPTDIR/../temp/ids/lines_$start-$fin"'_'"species-strain-ids"
+    >$output_file
 
     # Extract lines from the input file into the output file
-    sed -n ''"$start"','"$fin"'p' $SHUFFLED_LIST > $OUTPUTFILE
+    sed -n ''"$start"','"$fin"'p' $SHUFFLED_LIST > $nodes_segement
 
     # Define a range of lines for this chunk
     lines="$start-$fin"
@@ -68,7 +74,7 @@ for i in $(seq 1 $num_groups); do
     # Create a tmux session for processing this chunk
     session_name="strain_replace_$start-$fin"
     echo -e "\nNew tmux session created: $session_name"
-    tmux new-session -d -s $session_name "bash $SCRIPTDIR/remove_strains_from_seqid2taxid_v2.sh $OUTPUTFILE $nodes_file $seq_tax_id_map_copy $LOGFILE"
+    tmux new-session -d -s $session_name "bash $SCRIPTDIR/remove_strains_from_seqid2taxid_v2.sh $nodes_segement $nodes_file $seq_tax_id_map_copy $LOGFILE $output_file"
 
     # Update the start and finish line numbers for the next chunk
     start=$((start + div))
