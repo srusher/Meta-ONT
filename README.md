@@ -1,19 +1,9 @@
-[![GitHub Actions CI Status](https://github.com/scicomp/nfcoreskeleton/workflows/nf-core%20CI/badge.svg)](https://github.com/scicomp/nfcoreskeleton/actions?query=workflow%3A%22nf-core+CI%22)
-[![GitHub Actions Linting Status](https://github.com/scicomp/nfcoreskeleton/workflows/nf-core%20linting/badge.svg)](https://github.com/scicomp/nfcoreskeleton/actions?query=workflow%3A%22nf-core+linting%22)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
-
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
-[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
-[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Nextflow Tower](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Nextflow%20Tower-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/scicomp/nfcoreskeleton)
-
 ## Meta-ONT Workflow Diagram
 ![Meta-ONT workflow diagram](docs/workflow_diagram.PNG)
 
-
 ## Summary
 
-**Meta-ONT** is optimized for long, Nanopore reads and is designed to filter and denoise environmental samples to produce meaningful assemblies and identify pathogens of interests. It expects dorado trimmed, ONT reads as input and runs them through the following processes:
+**Meta-ONT** is a bioinformatics workflow that accepts ONT reads as input and runs them through the following processes:
 
 1. _OPTIONAL_: Subsampling ([`BBMap`](https://github.com/BioInfoTools/BBMap))
 
@@ -121,6 +111,13 @@ Example:
 nextflow run main.nf -profile singularity,local --input "./assets/samplesheet.csv" --outdir "./results/test" --skip_subsample false --num_subsamples 1000 --skip_kraken2 false
 ```
 
+## Update: Sample barplot from classification comparison module
+
+The following barplot was generated using my new classification comparison module which is intended to plot the top 10 classification hits from alignment-based classification and kraken2 classification. The data used to generate this graph was a 10,000 read subsample from a ZYMO mock community sample:
+
+![Classification-comparison-barplot](docs/kraken-alignment-comparison-plot-sample.png)
+
+
 
 ## Parameters
 
@@ -215,10 +212,6 @@ See below for all possible input parameters:
 ## Credits
 
 Meta-ONT was originally written by Sam Rusher (rtq0@cdc.gov).
-
-## Contributions and Support
-
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
 ## Citations
 

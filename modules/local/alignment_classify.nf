@@ -6,12 +6,14 @@ process ALIGNMENT_CLASSIFY {
     input:
     tuple val(meta), path(bam)
     path(seq2tax_map)
+    val(filter_alignment_by_id)
     path(my_tax_ids)
     val(include_children)
 
 
     output:
-    tuple val(meta), path('*classified.bam') , optional:true, emit: bam
+    tuple val(meta), path('*-classified.bam') , optional:true, emit: classified_bam
+    tuple val(meta), path('*-classified-plus-filtered.bam') , optional:true, emit: classified_plus_filtered_bam
     tuple val(meta), path('*ID-sorted.tsv') , optional:true, emit: id_tsv
     tuple val(meta), path('*name-sorted.tsv') , optional:true, emit: name_tsv
 
@@ -20,15 +22,7 @@ process ALIGNMENT_CLASSIFY {
 
     """
 
-    if [[ $include_children ]]; then
-
-        bash "${projectDir}/bin/alignment_classify.sh" $prefix $bam $seq2tax_map $my_tax_ids ${params.ncbi_taxonomy_nodes} ${params.ncbi_taxonomy_names} ${params.strain_2_species}
-
-    else
-
-        bash "${projectDir}/bin/alignment_classify.sh" $prefix $bam $seq2tax_map $my_tax_ids "" ${params.ncbi_taxonomy_names}
-
-    fi
+    bash "${projectDir}/bin/alignment_classify.sh" $prefix $bam $seq2tax_map $filter_alignment_by_id $my_tax_ids $include_children ${params.ncbi_taxonomy_nodes} ${params.ncbi_taxonomy_names} ${params.strain_2_species}
 
     """
 

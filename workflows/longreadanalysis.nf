@@ -93,6 +93,7 @@ include { BBMAP_REFORMAT as BBMAP_REFORMAT_SUBSAMPLE      } from '../modules/loc
 include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_UNMAPPED } from '../modules/local/bbmap_reformat'
 include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_MAPPED   } from '../modules/local/bbmap_reformat'
 include { PARSE_READS_BY_TAXON                            } from '../modules/local/parse_reads_by_taxon'
+include { KRAKEN_ALIGNMENT_COMPARISON                     } from '../modules/local/alignment_and_kraken_comparison'
 include { SPADES                                          } from '../modules/local/spades'
 include { UNZIP                                           } from '../modules/local/unzip'
 include { UNZIP as UNZIP_POLISHED                         } from '../modules/local/unzip'
@@ -243,40 +244,51 @@ workflow LONGREADANALYSIS {
         ALIGNMENT_CLASSIFY (
 
             ALIGN_READS.out.bam,
-            params.seq2tax_map,
+            params.seqid2taxid_map,
+            params.filter_alignment_by_id,
             params.my_tax_ids,
             params.include_children
 
         )
 
+        if (params.filter_alignment_by_id) {
+
+            alignment_classified_bam = ALIGNMENT_CLASSIFY.out.classified_plus_filtered_bam
+
+        } else {
+
+            alignment_classified_bam = ALIGNMENT_CLASSIFY.out.classified_bam
+
+        }
+
         SAMTOOLS_STATS (
 
-            ALIGNMENT_CLASSIFY.out.bam
+            alignment_classified_bam
 
         )
 
         SAMTOOLS_DEPTH (
 
-            ALIGNMENT_CLASSIFY.out.bam
+            alignment_classified_bam
 
         )
 
         SAMTOOLS_INDEX (
 
-            ALIGNMENT_CLASSIFY.out.bam
+            alignment_classified_bam
 
         )
 
         SAMTOOLS_COVERAGE (
 
-            ALIGNMENT_CLASSIFY.out.bam.join(SAMTOOLS_INDEX.out.bai)
+            alignment_classified_bam.join(SAMTOOLS_INDEX.out.bai)
 
         )
 
         // filtering for reads with a mapping quality at or above params.mapping_quality
         SAMTOOLS_QUALITY_FILTER (
 
-            ALIGNMENT_CLASSIFY.out.bam,
+            alignment_classified_bam,
             false
 
         )
@@ -395,6 +407,18 @@ workflow LONGREADANALYSIS {
             params.kraken_db_protein,
             true,
             false
+
+        )
+
+    }
+
+
+    //if kraken2 and custom alignment are both used for classification then compare the results
+    if (!params.skip_kraken2 && !params.skip_alignment_based_filtering) {
+
+        KRAKEN_ALIGNMENT_COMPARISON (
+
+            KRAKEN2_MAIN.out.report.join(ALIGNMENT_CLASSIFY.out.name_tsv)
 
         )
 
