@@ -14,13 +14,19 @@
 
 3. Read Alignment ([`minimap2`](https://github.com/lh3/minimap2))
 
-4. Alignment based filtering ([`samtools`](https://www.htslib.org/doc/samtools.html)) plus custom scripts
+4. Alignment-based Classification ([`samtools`](https://www.htslib.org/doc/samtools.html)) plus custom scripts
 
-5. Taxonomic Classification ([`Kraken2`](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown))
+     - _OPTIONAL_: Read filtering by taxonomic ID (custom module)
 
-6. Taxonomic Distribution Visualization ([`Krona`](https://github.com/marbl/Krona/wiki))
+5. K-mer based Classification ([`Kraken2`](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown))
 
-7. Assembly with one of 3 tools:
+     - _OPTIONAL_: Read filtering by taxonomic ID ([`KrakenTools`](https://github.com/jenniferlu717/KrakenTools))
+
+6. _OPTIONAL_: K-mer based Taxonomic Distribution Visualization ([`Krona`](https://github.com/marbl/Krona/wiki))
+
+7. _OPTIONAL_: Alignment-based and K-mer Classifier Comparison Barplot (custom module)
+
+8. Assembly with one of 3 tools:
 
      - [`Flye`](https://github.com/fenderglass/Flye)
 
@@ -28,19 +34,19 @@
 
      - [`Spades`](https://github.com/ablab/spades) - NOTE: Spades assembler should only be used with long reads when performing a hybrid assembly
 
-8. Assembly QC ([`quast`](https://github.com/ablab/quast))
+9. Assembly QC ([`quast`](https://github.com/ablab/quast))
 
-9. _OPTIONAL_: Assembly polishing ([`Medaka`](https://github.com/nanoporetech/medaka))
+10. _OPTIONAL_: Assembly Polishing ([`Medaka`](https://github.com/nanoporetech/medaka))
 
-10. _OPTIONAL_: Polished assembly QC ([`quast`](https://github.com/ablab/quast))
+11. _OPTIONAL_: Polished Assembly QC ([`quast`](https://github.com/ablab/quast))
 
-11. Binning ([`Maxbin2`](https://sourceforge.net/projects/maxbin2/))
+12. Binning ([`Maxbin2`](https://sourceforge.net/projects/maxbin2/))
 
-12. Contig alignment and identification ([`blast`](https://www.ncbi.nlm.nih.gov/books/NBK279684/))
+13. Contig Alignment and Identification ([`blast`](https://www.ncbi.nlm.nih.gov/books/NBK279684/))
 
-13. Contig translation (Nucl -> AA) and protein identification ([`blastx`](https://www.ncbi.nlm.nih.gov/books/NBK279684/))
+14. Contig Translation (Nucl -> AA) and Protein Identification ([`blastx`](https://www.ncbi.nlm.nih.gov/books/NBK279684/))
 
-14. Workflow Summary ([`MultiQC`](https://github.com/MultiQC/MultiQC))
+15. Workflow Summary ([`MultiQC`](https://github.com/MultiQC/MultiQC))
 
 
 ## Setup
