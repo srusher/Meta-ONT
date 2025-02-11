@@ -9,7 +9,7 @@ my_tax_ids=$5
 include_children=$6
 nodes=$7
 taxa_names=$8
-strain_2_species=$9
+total_reads=$9
 
 # Determining child nodes based on parent tax ID provided
 if [[ "$filter_alignment_by_id" == "true" && "$include_children" == "true" ]]; then
@@ -73,34 +73,27 @@ singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -H $2 > "$pre
 
 singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view $2 > "$prefix-temp.sam" #converting bam to sam for easier parsing in the loop below
 
+>"$prefix-alignment-classifiedreads.txt"
 
 declare -A taxa #creating dictionary to count the number of primary alignments present for each taxa 
-num_reads=0
+num_classified_reads=0
 
 while IFS= read -r line; do #looping through each alignment in sam file
 
     flag=$(echo $line | awk '{print $2}') #grabbing value from "flag" column
 
-    if [[ "$flag" == "0" ]]; then #confirm this is a primary alignment
+    if [[ "$flag" == "0" || "$flag" == "16" ]]; then #confirm this is a primary alignment
 
+        read_id=$(echo $line | awk '{print $1}')
         seq_id=$(echo $line | awk '{print $3}') #grabbing value of the reference the read aligned to
-        tax_id=$(grep "$seq_id" $seqid2taxid | cut -f2 ) #converting reference seq id to tax id using seqid2taxid conversion file I stole from kraken2
+        tax_id=$(grep "$seq_id" $seqid2taxid | cut -f2 ) #converting reference seq id to tax id using a modified seqid2taxid conversion file I stole from kraken2 - modified by replacing all strain tax IDs with parent species tax IDs
 
         if [[ -n $tax_id ]]; then
 
-            ((num_reads++))
+            ((num_classified_reads++))
 
-            echo -e "$line" >> $prefix-classified.sam
-
-            ## We shouldn't need this block anymore with the new seqid2taxid_no-strain.map
-            # block converting strain tax ID and below to parent species tax ID
-            # node=$(awk "\$1 == $tax_id" $nodes)
-
-            # if [[ $(echo $node | awk '{print $5}') == "strain" || $(echo $node | awk '{print $5}') == "no rank"  ]]; then
-
-            #     tax_id=$(grep -w "$tax_id" $strain_2_species | cut -d '|' -f1)
-
-            # fi
+            echo "$line" >> $prefix-classified.sam # DO NOT use '-e' flag here with echo! - This can cause CIGAR strings that contain the sequence "\n" to be split up into separate lines
+            echo -e "$read_id\t$tax_id" >> $prefix-alignment-classifiedreads.txt #adding read name and associated tax ID to separate file
 
             if [[ -v taxa["${tax_id}"] ]]; then
 
@@ -123,7 +116,7 @@ while IFS= read -r line; do #looping through each alignment in sam file
 done < "$prefix-temp.sam"
 
 
-if [[ "$filter_alignment_by_id" == "true" ]]; then # if we want to filter the new sam file by certain tax IDs proceed with this block
+if [[ "$filter_alignment_by_id" == "true" ]]; then # if we want to filter the new sam file for certain tax IDs proceed with this block
 
     >$prefix-classified-plus-filtered.sam
 
@@ -153,7 +146,7 @@ singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -@ 16 -S -b $
 >"$prefix-taxa-count.tsv"
 
 for key in "${!taxa[@]}"; do
-    percent=$(awk "BEGIN {print ${taxa["$key"]} / $num_reads}")
+    percent=$(awk "BEGIN {print ${taxa["$key"]} / $total_reads}")
     echo -e "$key\t${taxa[$key]}\t$percent" >> $prefix-taxa-count.tsv
 done
 
@@ -162,15 +155,20 @@ rm -f $prefix-taxa-count.tsv
 
 
 #converting tax ids to taxa names
->$prefix-taxa-count-by-name-sorted.tsv
+>$prefix-alignment-classification-summary.tsv
+
+unclassified_reads=$((total_reads - num_classified_reads))
+unclassified_reads_percent=$(awk "BEGIN {print ($unclassified_reads / $total_reads) * 100}")
+echo -e "unclassified\t$unclassified_reads\t$unclassified_reads_percent" >> $prefix-alignment-classification-summary.tsv
 
 while IFS= read -r line; do
 
     tax_id=$(echo "$line" | awk '{print $1}')
     taxa_count=$(echo "$line" | awk '{print $2}')
     percent=$(echo "$line" | awk '{print $3}' | awk '{$1=$1*100; print $0}')
-    taxa_name=$(grep "^$tax_id.[|].*scientific name" $taxa_names | cut -d "|" -f 2 | tr -d '\t')
+    taxa_name=$(grep "^$tax_id.[|].*scientific name" $taxa_names | cut -d "|" -f 2 | tr -d '\t') # this line is grabbing the scientific name from the names.dmp taxonomy file
 
-    echo -e "$taxa_name\t$taxa_count\t$percent" >> $prefix-taxa-count-by-name-sorted.tsv   
+    sed -i "s|$tax_id|$taxa_name|g" $prefix-alignment-classifiedreads.txt # replacing tax id with scientific name in the classified reads file
+    echo -e "$taxa_name\t$taxa_count\t$percent" >> $prefix-alignment-classification-summary.tsv   
 
 done < $prefix-taxa-count-by-ID-sorted.tsv

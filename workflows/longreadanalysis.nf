@@ -247,7 +247,8 @@ workflow LONGREADANALYSIS {
             params.seqid2taxid_map,
             params.filter_alignment_by_id,
             params.my_tax_ids,
-            params.include_children
+            params.include_children,
+            NANOPLOT_TRIMMED.out.txt
 
         )
 
@@ -418,7 +419,7 @@ workflow LONGREADANALYSIS {
 
         KRAKEN_ALIGNMENT_COMPARISON (
 
-            KRAKEN2_MAIN.out.report.join(ALIGNMENT_CLASSIFY.out.name_tsv)
+            KRAKEN2_MAIN.out.report.join(ALIGNMENT_CLASSIFY.out.summary_tsv)
 
         )
 

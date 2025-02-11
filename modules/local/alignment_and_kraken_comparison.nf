@@ -14,7 +14,7 @@ process KRAKEN_ALIGNMENT_COMPARISON {
 
     """
 
-    bash "${projectDir}/bin/alignment_kraken_comparison.sh" $prefix $kraken_report $alignment_report "${projectDir}/bin/kraken_alignment_plot.R"
+    bash "${projectDir}/bin/alignment_kraken_comparison.sh" $prefix $kraken_report $alignment_report "${projectDir}/bin/kraken_alignment_plot.R" ${params.ncbi_taxonomy_names}
 
     """
 

@@ -25,15 +25,17 @@ df <- df %>%
 # Pull the top n scores by category - will give us 2n rows because there are two algorithm categories
 top_hits <- df %>%
   group_by(algorithm) %>%
-  slice_max(order_by = percent_classified_reads, n = 10)
+  slice_max(n = 10, order_by = percent_classified_reads)
 
 # Randomizing the order of the rows - this is so when we go to create this bar chart, the order of species isn't always highest to lowest or vice-versa - makes it look better in my opinion
-top_hits <- top_hits[sample(nrow(top_hits)), ]
+#top_hits <- top_hits[sample(nrow(top_hits)), ]
 
-categories <- top_hits[, 1, drop = FALSE]
+df_temp <- top_hits %>%
+  arrange(desc(percent_classified_reads))
+
+categories <- df_temp[, 1, drop = FALSE]
 categories <- categories$Species.name
 categories <- unique(categories)
-categories <- rev(categories)
 
 
 # Creating new df with kraken rows in top half in the same order as the "categories" var
@@ -53,7 +55,7 @@ for (i in categories) {
   
 }
 
-# Appending alignment rows to bottom half of top_hits_mod in the same order as the "categories" var - this will give us ordered kraken rows at the top of the df and ordred alignment rows at the bottom half of the df
+# Appending 'alignment' rows to bottom half of top_hits_mod in the same order as the "categories" var - this will give us ordered kraken rows at the top of the df and ordred alignment rows at the bottom half of the df
 for (i in categories) {
   
   for (x in 1:nrow(top_hits)) {
@@ -115,27 +117,36 @@ for (i in 1:nrow(top_hits_mod)) {
   
 }
 
-
 # Adding column that will define the data label text displayed on the graph
 top_hits_mod$label_percent <- NA
 top_hits_mod$label_percent = paste0(sprintf("%.1f", top_hits_mod$percent_classified_reads), "%")
 
 
 colors <- c(
-  "#FF6666", "#33CC33", "#6666FF", "#CCCC33", # Dark Red, Dark Green, Dark Blue, Dark Yellow
-  "#CC33CC", "#33CCCC", "#CC6633", "#CC9933", # Dark Magenta, Dark Cyan, Burnt Orange, Dark Gold
-  "#66CC33", "#9933CC", "#33CC99", "#3366CC", # Forest Green, Deep Purple, Sea Green, Royal Blue
-  "#CC66CC", "#3399CC", "#CC9966", "#99CC66", # Plum, Sky Blue, Tan, Moss Green
-  "#CCCC66", "#66CCCC", "#CC3399", "#6699CC", # Olive, Teal, Raspberry, Steel Blue
-  "#CC99CC", "#99CCCC", "#CC9933", "#CC3399"  # Mauve, Soft Aqua, Goldenrod, Fuchsia
+  "#FF7666", "#5FD1B7",  # Lighter Red → Teal  
+  "#FFA463", "#6FA9E3",  # Lighter Orange → Blue  
+  "#B885E6", "#F8DB4A",  # Lighter Purple → Yellow  
+  "#6FDA8B", "#EA7BA5",  # Lighter Green → Pink  
+  "#8899B3", "#F4B843",  # Soft Slate Blue → Goldenrod  
+  "#5D7A99", "#E08E5C",  # Soft Blue Gray → Burnt Orange  
+  "#C7A0E6", "#E57373",  # Medium Purple → Soft Crimson  
+  "#69D4C3", "#D49EE2",  # Strong Teal → Soft Violet  
+  "#E57373", "#81C784",  # Soft Red → Fresh Green  
+  "#FF7666", "#64B5F6",  # Lighter Bold Red → Vibrant Blue  
+  "#AF7AC5", "#F9E79F",  # Soft Purple → Warm Yellow  
+  "#566F8E", "#C2C2C2"   # Deep Gray-Blue → Light Gray  
 )
 
-plot_1 <- ggplot(top_hits_mod, aes(x = algorithm, fill = factor(Species.name, levels = categories), y = percent_classified_reads)) +
-  geom_col(width = 0.6) +
-  theme(legend.title = element_blank()) +
-  geom_text(aes(y = label_position, label = label_percent), size = 3) +
-  coord_flip() +
-  scale_fill_manual(values=colors, 
-                    labels=categories)
+# converting percent values below 1% to 1% so they are more easily visible on the graph
+top_hits_mod <- top_hits_mod %>%
+  mutate(percent_classified_reads = ifelse(percent_classified_reads < 1, 1, percent_classified_reads))
 
-ggsave("plot.png", width = 1920, height = 1080, dpi = 200, units = "px")
+plot_1 <- ggplot(top_hits_mod, aes(x = algorithm, fill = factor(Species.name, levels = rev(factor(categories))), y = percent_classified_reads)) +
+  geom_col(width = 0.5) +
+  theme(legend.title = element_blank(), legend.position = "top") +
+  theme(axis.text.x = element_blank()) +
+  geom_text(aes(label = label_percent), position = position_stack(vjust = 0.5), size = 2.5) +  
+  scale_fill_manual(values=colors) +
+  coord_flip()
+
+ggsave("plot.png", width = 14, height = 6, dpi = 150)
