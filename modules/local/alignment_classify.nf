@@ -4,12 +4,11 @@ process ALIGNMENT_CLASSIFY {
     errorStrategy 'ignore'
 
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bam), path(nanostats)
     path(seq2tax_map)
     val(filter_alignment_by_id)
     path(my_tax_ids)
     val(include_children)
-    tuple val(meta), path(nanostats)
 
 
     output:

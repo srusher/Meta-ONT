@@ -33,10 +33,14 @@ top_hits <- df %>%
 df_temp <- top_hits %>%
   arrange(desc(percent_classified_reads))
 
+# curating list of species to be used as level parameter in ggplot
 categories <- df_temp[, 1, drop = FALSE]
 categories <- categories$Species.name
 categories <- unique(categories)
 
+if ("unclassified" %in% categories) {
+  categories <- c(categories[categories != "unclassified"], "unclassified")
+}
 
 # Creating new df with kraken rows in top half in the same order as the "categories" var
 top_hits_mod <- data.frame()
@@ -55,6 +59,27 @@ for (i in categories) {
   
 }
 
+### This block will the number and percent of "other" species classified by the "kraken" algorithm and add them as a new row
+total_percent_kraken <- sum(top_hits_mod$percent_classified_reads[top_hits_mod$algorithm == "kraken"])
+
+if (total_percent_kraken < 100) {
+
+  percent_other_kraken <- 100 - total_percent_kraken
+
+  new_row_other <- data.frame(
+    Species.name = "other",
+    num_reads = round(sum(top_hits_mod$num_reads[top_hits_mod$algorithm == "kraken"]) / (total_percent_kraken / 100)) - sum(top_hits_mod$num_reads[top_hits_mod$algorithm == "kraken"]),
+    percent_classified_reads = percent_other_kraken,
+    algorithm = "kraken"
+  )
+
+  top_hits_mod <- rbind(top_hits_mod, new_row_other)
+
+  categories <- c(categories, "other")
+
+}
+###
+
 # Appending 'alignment' rows to bottom half of top_hits_mod in the same order as the "categories" var - this will give us ordered kraken rows at the top of the df and ordred alignment rows at the bottom half of the df
 for (i in categories) {
   
@@ -70,7 +95,23 @@ for (i in categories) {
   
 }
 
-#top_hits_mod <- top_hits_mod[order(top_hits_mod$Species.name), ]
+### This block will the number and percent of "other" species classified by the "alignment" algorithm and add them as a new row
+total_percent_alignment <- sum(top_hits_mod$percent_classified_reads[top_hits_mod$algorithm == "alignment"])
+
+if (total_percent_alignment < 100) {
+
+  percent_other_alignment <- 100 - total_percent_alignment
+
+  new_row_other <- data.frame(
+  Species.name = "other",
+    num_reads = round(sum(top_hits_mod$num_reads[top_hits_mod$algorithm == "alignment"]) / (total_percent_alignment / 100)) - sum(top_hits_mod$num_reads[top_hits_mod$algorithm == "alignment"]),
+    percent_classified_reads = percent_other_alignment,
+    algorithm = "alignment"
+  )
+  top_hits_mod <- rbind(top_hits_mod, new_row_other)
+
+}
+###
 
 # This for loop will calculate the position of each data label for each row
 top_hits_mod$label_position <- NA
@@ -117,6 +158,7 @@ for (i in 1:nrow(top_hits_mod)) {
   
 }
 
+
 # Adding column that will define the data label text displayed on the graph
 top_hits_mod$label_percent <- NA
 top_hits_mod$label_percent = paste0(sprintf("%.1f", top_hits_mod$percent_classified_reads), "%")
@@ -136,6 +178,20 @@ colors <- c(
   "#AF7AC5", "#F9E79F",  # Soft Purple → Warm Yellow  
   "#566F8E", "#C2C2C2"   # Deep Gray-Blue → Light Gray  
 )
+
+# counting length of category array
+# category_len <- length(categories)
+
+if ("unclassified" %in% categories && "other" %in% categories) {
+
+  colors[2] <- "#D3D3D3"
+  colors[1] <-  "#A9A9A9"
+
+} else if ("unclassified" %in% categories || "other" %in% categories) {
+
+  colors[1] <- "#D3D3D3"
+
+}
 
 # converting percent values below 1% to 1% so they are more easily visible on the graph
 top_hits_mod <- top_hits_mod %>%

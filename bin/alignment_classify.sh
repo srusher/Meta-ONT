@@ -73,6 +73,12 @@ singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -H $2 > "$pre
 
 singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view $2 > "$prefix-temp.sam" #converting bam to sam for easier parsing in the loop below
 
+if [[ "$filter_alignment_by_id" == "true" ]]; then
+
+    singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -H $2 > "$prefix-classified-plus-filtered.sam" #printing bam headers to output sam file
+
+fi
+
 >"$prefix-alignment-classifiedreads.txt"
 
 declare -A taxa #creating dictionary to count the number of primary alignments present for each taxa 
@@ -94,6 +100,16 @@ while IFS= read -r line; do #looping through each alignment in sam file
 
             echo "$line" >> $prefix-classified.sam # DO NOT use '-e' flag here with echo! - This can cause CIGAR strings that contain the sequence "\n" to be split up into separate lines
             echo -e "$read_id\t$tax_id" >> $prefix-alignment-classifiedreads.txt #adding read name and associated tax ID to separate file
+
+            if [[ "$filter_alignment_by_id" == "true" ]]; then
+
+                if [[ $(grep -x "$tax_id" $tax_ids_i_want) ]]; then # see if tax ID from this alignment is one of our specified tax IDs
+
+                    echo "$line" >> $prefix-classified-plus-filtered.sam
+
+                fi
+
+            fi                
 
             if [[ -v taxa["${tax_id}"] ]]; then
 
@@ -117,21 +133,6 @@ done < "$prefix-temp.sam"
 
 
 if [[ "$filter_alignment_by_id" == "true" ]]; then # if we want to filter the new sam file for certain tax IDs proceed with this block
-
-    >$prefix-classified-plus-filtered.sam
-
-    while IFS= read -r line; do #looping through post-classification alignment file
-
-        seq_id=$(echo $line | awk '{print $3}') #grabbing value of the reference the read aligned to
-        tax_id=$(grep "$seq_id" $seqid2taxid | cut -f2 ) #converting reference seq id to tax id using seqid2taxid conversion file I stole from kraken2
-
-        if [[ $(grep -x "$tax_id" $tax_ids_i_want) ]]; then # see if tax ID from this alignment is one of our specified tax IDs
-
-            echo -e "$line" >> $prefix-classified-plus-filtered.sam
-
-        fi
-
-    done < "$prefix-classified.sam"
 
     #converting sam file into bam file
     singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -@ 16 -S -b $prefix-classified-plus-filtered.sam > $prefix-classified-plus-filtered.bam

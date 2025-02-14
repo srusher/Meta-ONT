@@ -243,12 +243,11 @@ workflow LONGREADANALYSIS {
         // custom module that parses a bam file and pulls out each alignment that corresponds to a reference sequence under a specified tax id
         ALIGNMENT_CLASSIFY (
 
-            ALIGN_READS.out.bam,
+            ALIGN_READS.out.bam.join(NANOPLOT_TRIMMED.out.txt),
             params.seqid2taxid_map,
             params.filter_alignment_by_id,
             params.my_tax_ids,
-            params.include_children,
-            NANOPLOT_TRIMMED.out.txt
+            params.include_children
 
         )
 
