@@ -1,6 +1,7 @@
 process MINIMAP2_ALIGN {
     tag "$meta.id"
     label 'process_high'
+    errorStrategy 'ignore'
 
     // Note: the versions here need to match the versions used in the mulled container below and minimap2/index
     conda "${moduleDir}/environment.yml"
@@ -28,13 +29,32 @@ process MINIMAP2_ALIGN {
     def args  = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def bam_output = bam_format ? "-a | samtools sort -@ ${task.cpus-1} -o ${prefix}.bam ${args2}" : "-o ${prefix}.paf"
+    def bam_output = bam_format ? " | samtools sort -@ ${task.cpus-1} -o ${prefix}.bam ${args2}" : "-o ${prefix}.paf"
     def cigar_paf = cigar_paf_format && !bam_format ? "-c" : ''
     def set_cigar_bam = cigar_bam && bam_format ? "-L" : ''
     """
+    if ${params.memory_saver}; then
+    
+        start="false"
+
+        while [[ \$start == "false" ]]; do
+
+            if [[ \$(ls ${projectDir}/queue/minimap2 | wc -l) -gt 1 ]]; then
+
+                sleep 5
+            
+            else
+
+                start="true"
+                touch ${projectDir}/queue/minimap2/$prefix-minimap2
+
+            fi
+
+        done
+    fi
+
     minimap2 \\
         $args \\
-        -t $task.cpus \\
         ${reference ?: reads} \\
         $reads \\
         $cigar_paf \\
@@ -46,18 +66,28 @@ process MINIMAP2_ALIGN {
     "${task.process}":
         minimap2: \$(minimap2 --version 2>&1)
     END_VERSIONS
+
+    if ${params.memory_saver}; then
+
+        rm -f ${projectDir}/queue/minimap2/$prefix-minimap2
+    
+    fi
+
     """
 
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def output_file = bam_format ? "${prefix}.bam" : "${prefix}.paf"
-    """
-    touch $output_file
-    touch ${prefix}.csi
+    // stub:
+    // def prefix = task.ext.prefix ?: "${meta.id}"
+    // def output_file = bam_format ? "${prefix}.bam" : "${prefix}.paf"
+    // """
+    // touch $output_file
+    // touch ${prefix}.csi
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        minimap2: \$(minimap2 --version 2>&1)
-    END_VERSIONS
-    """
+    // cat <<-END_VERSIONS > versions.yml
+    // "${task.process}":
+    //     minimap2: \$(minimap2 --version 2>&1)
+    // END_VERSIONS
+
+    // rm -f ${projectDir}/queue/minimap2/$prefix-minimap2
+
+    // """
 }

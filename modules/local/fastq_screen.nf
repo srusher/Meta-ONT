@@ -13,7 +13,7 @@ process FASTQSCREEN {
     script:
     def prefix = "${meta.id}"
     """
-    singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/fastq-screen/custom/fastq_screen-0.15.3_modified.sif fastq_screen ${reads} --conf ./${conf} --aligner minimap2 --tag ${reads}
+    singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/fastq-screen/custom/fastq_screen-0.15.3_modified.sif fastq_screen ${reads} --conf ./${conf} --aligner minimap2 --tag ${reads}
     """
 
 }

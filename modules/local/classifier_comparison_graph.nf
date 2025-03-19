@@ -22,6 +22,6 @@ process CLASSIFIER_COMPARISON_GRAPH {
     echo -e "Species\tAbundance(%)\tClassifier" > ${prefix}_merged_sorted_wheader
     cat ${prefix}_merged_sorted >> ${prefix}_merged_sorted_wheader
 
-    singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/seaborn/seaborn-latest.sif python3 ${projectDir}/bin/meta_graph.py "${prefix}_merged_sorted_wheader" "${prefix}"
+    singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/seaborn/seaborn-latest.sif python3 ${projectDir}/bin/meta_graph.py "${prefix}_merged_sorted_wheader" "${prefix}"
     """
 }

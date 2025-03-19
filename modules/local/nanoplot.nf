@@ -13,7 +13,8 @@ process NANOPLOT {
 
     output:
     tuple val(meta), path("*report.html")                , emit: html
-    tuple val(meta), path("*.png") , optional: true, emit: png
+    tuple val(meta), path("*dot.png") , optional: true, emit: dot
+    tuple val(meta), path("*kde.png") , optional: true, emit: kde
     tuple val(meta), path("*.txt")                 , emit: txt
     //tuple val(meta), path("*.log")                 , emit: log
     //path  "versions.yml"                           , emit: versions
@@ -25,12 +26,19 @@ process NANOPLOT {
     def args = task.ext.args ?: ''
     def input_file = ("$ontfile".endsWith(".fastq.gz")) ? "--fastq ${ontfile}" : ("$ontfile".endsWith(".fastq")) ? "--fastq ${ontfile}" :
         ("$ontfile".endsWith(".txt")) ? "--summary ${ontfile}" : ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     NanoPlot \\
         $args \\
         -t $task.cpus \\
-        --prefix ${meta.id} \\
+        --prefix "${prefix}_" \\
         $input_file
+
+    if [[ "$input_file" == *"trimmed"* ]]; then
+
+        mv ${prefix}_NanoStats.txt ${prefix}_NanoStats_trimmed.txt
+
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

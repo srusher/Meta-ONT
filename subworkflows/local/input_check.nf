@@ -7,6 +7,7 @@ include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
 workflow INPUT_CHECK {
     take:
     samplesheet // file: /path/to/samplesheet.csv
+    complete // placeholder file to prevent INPUT_CHECK from running until UPDATE_NODES_DB has finished
 
     main:
     SAMPLESHEET_CHECK ( samplesheet )

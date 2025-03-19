@@ -21,13 +21,13 @@ process READS_TO_BLASTDB {
 
     awk 'NR%4==1 {print ">" substr(\$0, 2)} NR%4==2 {print}' $fastq > ${prefix}_kraken-translate_filtered.fasta
 
-    singularity exec \$gwa_parent/singularity/blast/blast-2.15.0--pl5321h6f7f691_1 makeblastdb -in ${prefix}_kraken-translate_filtered.fasta -dbtype nucl -out nucl_reads
+    singularity exec --bind /scicomp \$gwa_parent/singularity/blast/blast-2.15.0--pl5321h6f7f691_1 makeblastdb -in ${prefix}_kraken-translate_filtered.fasta -dbtype nucl -out nucl_reads
 
     BLAST_CONTAINER="/apps/standalone/singularity/blast/blast-2.15.0--pl5321h6f7f691_1"
     BLASTDB=/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/blast/taxonomy
     blast_args="6 qseqid qstart qend sseqid sstart send pident length mismatch evalue bitscore sacc stitle staxids"
 
-    singularity exec \$BLAST_CONTAINER blastn -db "./nucl_reads" -query $gene -outfmt "\$blast_args" -num_threads 16 -out ${prefix}.txt
+    singularity exec --bind /scicomp \$BLAST_CONTAINER blastn -db "./nucl_reads" -query $gene -outfmt "\$blast_args" -num_threads 16 -out ${prefix}.txt
 
     mod_blast_args="\${blast_args/6 /}"
     mod_blast_args=\$(echo "\$mod_blast_args" | sed 's/ /\t/g')

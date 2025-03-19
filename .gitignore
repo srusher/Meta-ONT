@@ -1,6 +1,7 @@
 .nextflow*
 work/
 data/
+queue/*
 results/
 .DS_Store
 testing/
@@ -8,3 +9,5 @@ testing*
 *.pyc
 scratch/
 assets/samplesheets
+rtq0.config
+temp/

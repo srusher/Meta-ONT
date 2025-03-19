@@ -1,6 +1,6 @@
-process SAMTOOLS_INDEX {
+process SAMTOOLS_COVERAGE {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_single'
     errorStrategy 'ignore'
 
     conda "${moduleDir}/environment.yml"
@@ -9,41 +9,40 @@ process SAMTOOLS_INDEX {
         'biocontainers/samtools:1.19.2--h50ea8bc_0' }"
 
     input:
-    tuple val(meta), path(input)
+    tuple val(meta), path(input), path(input_index)
 
     output:
-    tuple val(meta), path("*.bai") , optional:true, emit: bai
-    tuple val(meta), path("*.csi") , optional:true, emit: csi
-    tuple val(meta), path("*.crai"), optional:true, emit: crai
-    path  "versions.yml"           , emit: versions
+    tuple val(meta), path("*.txt"), emit: coverage
+    path "versions.yml"           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    def args   = task.ext.args   ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     samtools \\
-        index \\
-        -@ ${task.cpus-1} \\
+        coverage \\
         $args \\
+        -o ${prefix}.txt \\
         $input
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' )
     END_VERSIONS
     """
 
     stub:
+    def args   = task.ext.args   ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${input}.bai
-    touch ${input}.crai
-    touch ${input}.csi
+    touch ${prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' )
     END_VERSIONS
     """
 }

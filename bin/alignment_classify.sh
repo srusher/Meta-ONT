@@ -1,5 +1,6 @@
 #!/bin/bash
 SAMTOOLS_CONTAINER="/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/samtools/samtools%3A1.21--h50ea8bc_0"
+SQLITE3_CONTAINER="/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/sqlite3/sqlite%3A3"
 
 prefix=$1
 bam=$2
@@ -10,66 +11,50 @@ include_children=$6
 nodes=$7
 taxa_names=$8
 total_reads=$9
+project_dir=${10}
+nodes_sqlite=${11}
 
 # Determining child nodes based on parent tax ID provided
 if [[ "$filter_alignment_by_id" == "true" && "$include_children" == "true" ]]; then
 
-    outfile="$prefix-parent_and_child_ids.txt"
-    >$outfile
+    echo "Collecting all children tax ids from SQL database"
 
-    while IFS= read -r id; do #iterating through tax ids listed in the tax id input file
+    >"$prefix-parent_and_child_ids.txt"
 
-        echo "$id" >> $outfile
-        tax_array=("$id") #creating array for tax ids
-        loop_again=true
+    for i in $(cat $my_tax_ids); do
 
-        while $loop_again; do
+        data=$(singularity exec --bind /scicomp $SQLITE3_CONTAINER sqlite3 $nodes_sqlite "SELECT * FROM TAX_IDS WHERE parent_id = "$i"")
 
-            count=0
+        parent_id="$i"        
+        echo $parent_id >> $prefix-parent_and_child_ids.txt
 
-            for i in "${tax_array[@]}"; do
+        if [[ -n $data ]]; then
 
-                if [[ $count -eq 0 ]]; then
+            child_ids=$(echo $data | cut -d '|' -f3 | sed 's/,/ /g' )
 
-                    tax_array=() #clearing out array to rebuild it with child tax ids for the next for loop iteration
-                    ((count++))
+            for i in $child_ids; do
 
-                fi
-
-                child_ids="$(awk -v id="$i" '$3 == id { print $1 }' $nodes)" #finding child nodes that have the "parent tax id" column set to current tax id
-
-                if [[ ! -z $child_ids ]]; then #checking to see if we found any child nodes
-
-                    for x in $child_ids; do
-
-                        echo "$x" >> $outfile
-                        tax_array+=("$x") #appending child tax ids to array to use in 
-
-                    done                        
-
-                else 
-
-                    continue
-
-                fi
-
+                echo $i >> $prefix-parent_and_child_ids.txt
+            
             done
+        
+        fi
 
-            if [ ${#tax_array[@]} -eq 0 ]; then
+    done
 
-                loop_again=false
+    tax_ids_i_want="$prefix-parent_and_child_ids.txt"
 
-            fi
+else
 
-        done
-
-    done < "$my_tax_ids"
-
-    tax_ids_i_want="$outfile"
+    tax_ids_i_want=""
 
 fi
 
+echo "Parsing BAM headers"
+
 singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -H $2 > "$prefix-classified.sam" #printing bam headers to output sam file
+
+echo "Converting BAM to SAM with no headers"
 
 singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view $2 > "$prefix-temp.sam" #converting bam to sam for easier parsing in the loop below
 
@@ -79,60 +64,119 @@ if [[ "$filter_alignment_by_id" == "true" ]]; then
 
 fi
 
->"$prefix-alignment-classifiedreads.txt"
+chunks=10
 
-declare -A taxa #creating dictionary to count the number of primary alignments present for each taxa 
-num_classified_reads=0
+# Get the total number of lines in the sam file
+total_lines=$(wc -l $prefix-temp.sam | cut -d ' ' -f 1)
 
-while IFS= read -r line; do #looping through each alignment in sam file
+# Calculate the number of lines per chunk (divided into n chunks)
+div=$((total_lines/chunks))
+start=1
+fin=$(($div+1))
 
-    flag=$(echo $line | awk '{print $2}') #grabbing value from "flag" column
+function parse_sam() {
 
-    if [[ "$flag" == "0" || "$flag" == "16" ]]; then #confirm this is a primary alignment
+    for i in $(seq 1 $chunks); do
 
-        read_id=$(echo $line | awk '{print $1}')
-        seq_id=$(echo $line | awk '{print $3}') #grabbing value of the reference the read aligned to
-        tax_id=$(grep "$seq_id" $seqid2taxid | cut -f2 ) #converting reference seq id to tax id using a modified seqid2taxid conversion file I stole from kraken2 - modified by replacing all strain tax IDs with parent species tax IDs
+        working_dir=$(pwd)
+        sam_chunk="$working_dir/sam_chunk_p$i"
+        tax_count="$working_dir/tax_count_p$i"
+        tax_ids_i_want="$working_dir/$tax_ids_i_want"
 
-        if [[ -n $tax_id ]]; then
+        if [ "$i" -eq $chunks ]; then
+        
+            #sometimes the SAM file cannot be broken up into n even chunks - so on the nth chunk we need to ensure we include all of the remaining lines in the file
+            sed -n ''"$start"','"$total_lines"'p' $prefix-temp.sam > sam_chunk_p$i
 
-            ((num_classified_reads++))
+        else 
+            # Extract lines from the input file into the output file
+            sed -n ''"$start"','"$fin"'p' $prefix-temp.sam > sam_chunk_p$i
 
-            echo "$line" >> $prefix-classified.sam # DO NOT use '-e' flag here with echo! - This can cause CIGAR strings that contain the sequence "\n" to be split up into separate lines
-            echo -e "$read_id\t$tax_id" >> $prefix-alignment-classifiedreads.txt #adding read name and associated tax ID to separate file
+        fi
 
-            if [[ "$filter_alignment_by_id" == "true" ]]; then
+        session_name="parse_sam_$i-$prefix"
 
-                if [[ $(grep -x "$tax_id" $tax_ids_i_want) ]]; then # see if tax ID from this alignment is one of our specified tax IDs
+        tmux new-session -d -s $session_name "bash $project_dir/bin/parse_primary_alignments.sh $working_dir $sam_chunk $tax_count $seqid2taxid $filter_alignment_by_id $tax_ids_i_want part-$i $prefix"         
+    
+        # Update the start and finish line numbers for the next chunk
+        start=$((start + div + 1))
+        fin=$((fin + div))
 
-                    echo "$line" >> $prefix-classified-plus-filtered.sam
+    done
+}
 
-                fi
+echo "Splitting up SAM parsing amongst tmux sessions"
 
-            fi                
+#execute above function
+parse_sam
 
-            if [[ -v taxa["${tax_id}"] ]]; then
+# only continue script once all tmux sessions have finished processing their respective chunks
+continue_code="false"
+while [[ $continue_code == "false" ]]; do
 
-                ((taxa["$tax_id"]++))
+    if [[ $(tmux list-sessions | cut -d ':' -f1 | grep "parse_sam" | wc -l) -gt 0 ]]; then
 
-            else
-                
-                taxa["$tax_id"]=1
-
-            fi
-
-        fi        
-
+        sleep 5
+    
     else
 
-        continue
+        continue_code="true"
+    
+    fi
+
+done
+
+echo "Concatenating respective tmux output files"
+
+#combining tmux output files into one file
+cat ./*"-part"*"alignment-classifiedreads.txt" > $prefix-alignment-classifiedreads.txt
+cat ./*"-part"*"classified.sam" >> $prefix-classified.sam
+
+if [[ "$filter_alignment_by_id" == "true" ]]; then
+
+    cat ./*"-part"*"classified-plus-filtered.sam" >> $prefix-classified-plus-filtered.sam
+
+fi
+
+
+# calculating total classified reads from tmux output files
+cat ./*"-part"*"class-read-count.txt" > $prefix-class-read-count.txt
+num_classified_reads=0
+while IFS= read -r line; do
+
+    num_classified_reads=$((num_classified_reads + line))
+
+done < "$prefix-class-read-count.txt"
+
+# creating aggregate taxa dict from tmux output files
+cat ./*"-part"*"taxa-dictionary.tsv" > $prefix-taxa-dictionary-all.tsv
+declare -A taxa
+
+while IFS= read -r line; do
+
+    tax_id=$(echo $line | cut -d '|' -f1)
+    count=$(echo $line | cut -d '|' -f2)
+
+    if [[ -v taxa["${tax_id}"] ]]; then
+
+        value=${taxa[$tax_id]}
+
+        echo "value: $value"
+
+        total=$((value + count))
+        taxa["$tax_id"]="$total"
+
+    else
+        
+        taxa["$tax_id"]=$count
 
     fi
 
-done < "$prefix-temp.sam"
+done < "$prefix-taxa-dictionary-all.tsv"
 
 
-if [[ "$filter_alignment_by_id" == "true" ]]; then # if we want to filter the new sam file for certain tax IDs proceed with this block
+
+if [[ "$filter_alignment_by_id" == "true" ]]; then
 
     #converting sam file into bam file
     singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -@ 16 -S -b $prefix-classified-plus-filtered.sam > $prefix-classified-plus-filtered.bam
@@ -173,3 +217,8 @@ while IFS= read -r line; do
     echo -e "$taxa_name\t$taxa_count\t$percent" >> $prefix-alignment-classification-summary.tsv   
 
 done < $prefix-taxa-count-by-ID-sorted.tsv
+
+# cleaning up temporary files
+rm -f $prefix-part-* 
+rm -f sam_chunk*
+rm -f $prefix-*.sam

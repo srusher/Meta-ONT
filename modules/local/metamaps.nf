@@ -27,9 +27,9 @@ process METAMAPS {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
 
-    singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/metamaps/metamaps-1.0.sif metamaps mapDirectly --all -r ${ref}/DB.fa -q ${reads} -o ./"$prefix"_classification_results --maxmemory ${params.metamaps_mem} -t ${params.metamaps_threads}
+    singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/metamaps/metamaps-1.0.sif metamaps mapDirectly --all -r ${ref}/DB.fa -q ${reads} -o ./"$prefix"_classification_results --maxmemory ${params.metamaps_mem} -t ${params.metamaps_threads}
     
-    singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/metamaps/metamaps-1.0.sif metamaps classify --mappings "$prefix"_classification_results --DB ${ref} -t ${params.metamaps_threads}
+    singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/metamaps/metamaps-1.0.sif metamaps classify --mappings "$prefix"_classification_results --DB ${ref} -t ${params.metamaps_threads}
 
     mv classification_results.EM "$prefix"_final_classification.EM
 

@@ -30,7 +30,7 @@ for file in "$@"; do
 
             echo -e "\nConverting fast5 into pod5...\n"
 
-            singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/pod5/pod5.sif pod5 convert fast5 $file $output_file
+            singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/pod5/pod5.sif pod5 convert fast5 $file $output_file
         
         else 
 
@@ -46,10 +46,10 @@ for file in "$@"; do
 
         echo -e "\nBasecalling with dorado...\n"
 
-        singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado basecaller /scicomp/home-pure/rtq0/EMEL-GWA/singularity/dorado/basecalling-models/dna_r10.4.1_e8.2_400bps_sup@v5.0.0 $output_file --kit-name SQK-RPB114-24 --no-trim --device cuda:all > $bam_file
+        singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado basecaller /scicomp/home-pure/rtq0/EMEL-GWA/singularity/dorado/basecalling-models/dna_r10.4.1_e8.2_400bps_sup@v5.0.0 $output_file --kit-name SQK-RPB114-24 --no-trim --device cuda:all > $bam_file
 
         # demultiplexing basecalled reads so that they are sorted by their original barcode label
-        singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado demux --no-classify --output-dir ./by-barcode/$barcode_output $bam_file
+        singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado demux --no-classify --output-dir ./by-barcode/$barcode_output $bam_file
 
         mkdir -p ./by-barcode/$barcode_output/trimmed
 
@@ -75,7 +75,7 @@ for file in "$@"; do
                 trim_output="$(basename $j)"
 
                 # trimming adapters and primers AFTER demultiplex step - otherwise trimming could interfere with barcode classification
-                singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado trim $j > ./by-barcode/$barcode_output/trimmed/$trim_output
+                singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado trim $j > ./by-barcode/$barcode_output/trimmed/$trim_output
 
             done
 
@@ -107,7 +107,7 @@ for file in "$@"; do
 
             for j in $bams; do
 
-                singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/samtools/samtools:1.9--h91753b0_8 samtools fastq $j >> $output_dir
+                singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/samtools/samtools:1.9--h91753b0_8 samtools fastq $j >> $output_dir
 
             done
 
@@ -115,7 +115,7 @@ for file in "$@"; do
 
         # fastq_file="$(basename "$bam_file" .bam)".fastq
 
-        # singularity exec /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/samtools/samtools:1.9--h91753b0_8 samtools fastq $bam_file > $fastq_file
+        # singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/samtools/samtools:1.9--h91753b0_8 samtools fastq $bam_file > $fastq_file
 
         #rm -f $bam_file
 

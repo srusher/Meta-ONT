@@ -3,7 +3,7 @@ process BBMAP_REFORMAT {
     label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        '/apps/standalone/singularity/bbmap/bbmap-39.01--h92535d8_1' :
+        '/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/bbmap/bbmap%3A39.11--h92535d8_0' :
         'https://depot.galaxyproject.org/singularity/bbmap%3A39.06--h92535d8_0' }"
 
     input:

@@ -67,7 +67,6 @@ class RowChecker:
         """
         self._validate_sample(row)
         self._validate_first(row)
-        self._validate_second(row)
         self._validate_pair(row)
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)

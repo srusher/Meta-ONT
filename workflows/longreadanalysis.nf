@@ -53,8 +53,6 @@ include { CHOPPER                                        } from '../modules/nf-c
 include { NONPAREIL_NONPAREIL                            } from '../modules/nf-core/nonpareil/nonpareil/main'
 include { NONPAREIL_CURVE                                } from '../modules/nf-core/nonpareil/curve/main'
 include { NONPAREIL_NONPAREILCURVESR                     } from '../modules/nf-core/nonpareil/nonpareilcurvesr/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2_MAIN                } from '../modules/nf-core/kraken2/kraken2/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2_PROTEIN             } from '../modules/nf-core/kraken2/kraken2/main'
 include { KRONA_KRONADB                                  } from '../modules/nf-core/krona/krona_db/main'
 include { KRAKENTOOLS_KREPORT2KRONA                      } from '../modules/nf-core/krakentools/kreport2krona/main'
 include { KRAKENTOOLS_EXTRACTKRAKENREADS                 } from '../modules/nf-core/krakentools/extractkrakenreads/main'
@@ -62,7 +60,6 @@ include { KRONA_KTIMPORTTEXT as KRONA_KRAKEN             } from '../modules/nf-c
 include { KRONA_KTIMPORTTEXT as KRONA_METAMAPS           } from '../modules/nf-core/krona/ktimporttext/main'
 include { FLYE                                           } from '../modules/nf-core/flye/main'
 include { MEGAHIT                                        } from '../modules/nf-core/megahit/main'
-include { MINIMAP2_ALIGN as ALIGN_READS                  } from '../modules/nf-core/minimap2/main'
 include { SAMTOOLS_DEPTH                                 } from '../modules/nf-core/samtools/depth/main'
 include { SAMTOOLS_INDEX                                 } from '../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_COVERAGE                              } from '../modules/nf-core/samtools/coverage/main'
@@ -77,19 +74,23 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS                    } from '../modules/nf-c
 //
 // MODULE: custom, local modules
 //
+include { UPDATE_NODES_DB                                 } from '../modules/local/update_nodes_db'
+include { BBMAP_REFORMAT as BBMAP_REFORMAT_SUBSAMPLE      } from '../modules/local/bbmap_reformat_subsample'
 include { NANOPLOT as NANOPLOT_RAW                        } from '../modules/local/nanoplot'
 include { NANOPLOT as NANOPLOT_TRIMMED                    } from '../modules/local/nanoplot'
 include { NANOPLOT as NANOPLOT_KRAKEN_TAXON_FILTERED      } from '../modules/local/nanoplot'
 include { NANOPLOT as NANOPLOT_ALIGNMENT_TAXON_FILTERED   } from '../modules/local/nanoplot'
 include { METAMAPS                                        } from '../modules/local/metamaps'
 include { FASTQSCREEN                                     } from '../modules/local/fastq_screen'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_MAIN                 } from '../modules/local/kraken2'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_PROTEIN              } from '../modules/local/kraken2'
 include { CLASSIFIER_COMPARISON_GRAPH                     } from '../modules/local/classifier_comparison_graph'
+include { MINIMAP2_ALIGN as ALIGN_READS                   } from '../modules/local/minimap2'
 include { SAMTOOLS_STATS                                  } from '../modules/local/samtools_stats'
 include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_UNMAPPED       } from '../modules/local/samtools_fastq'
 include { ALIGNMENT_CLASSIFY                              } from '../modules/local/alignment_classify'
 include { SAMTOOLS_VIEW as SAMTOOLS_QUALITY_FILTER        } from '../modules/local/samtools_view'
 include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_MAPPED         } from '../modules/local/samtools_fastq'
-include { BBMAP_REFORMAT as BBMAP_REFORMAT_SUBSAMPLE      } from '../modules/local/bbmap_reformat_subsample'
 include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_UNMAPPED } from '../modules/local/bbmap_reformat'
 include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_MAPPED   } from '../modules/local/bbmap_reformat'
 include { PARSE_READS_BY_TAXON                            } from '../modules/local/parse_reads_by_taxon'
@@ -102,6 +103,26 @@ include { QUAST                                           } from '../modules/loc
 include { QUAST as QUAST_MEDAKA                           } from '../modules/local/quast'
 include { BLAST_BLASTN                                    } from '../modules/local/blastn'
 
+//clearing out kraken and minimap2 queues if memory_saver mode is enabled (only required for local compute; memory allocation should generally be handled by the job scheduler when using the cluster)
+if (params.memory_saver) {
+
+    def kraken_queue = new File("${projectDir}/queue/kraken2")
+
+    if (kraken_queue.exists() && kraken_queue.isDirectory()) {
+        kraken_queue.eachFile { file ->
+            file.delete()
+        }
+    }
+
+    def minimap2_queue = new File("${projectDir}/queue/minimap2")
+
+    if (minimap2_queue.exists() && minimap2_queue.isDirectory()) {
+        minimap2_queue.eachFile { file ->
+            file.delete()
+        }
+    }
+
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,13 +138,32 @@ ch_multiqc_files = Channel.empty()
 
 workflow LONGREADANALYSIS {
 
+    if (!params.skip_alignment_based_filtering && params.filter_alignment_by_id) {
+
+        UPDATE_NODES_DB (
+
+            params.local_nodes_db,
+            params.ncbi_taxonomy_nodes,
+            params.my_tax_ids
+
+        )
+
+        placeholder = UPDATE_NODES_DB.out.complete
+
+    } else {
+
+        placeholder = []
+
+    }
+
     ch_versions = Channel.empty()
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     INPUT_CHECK (
-        file(params.input)
+        file(params.input),
+        placeholder
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
@@ -293,7 +333,7 @@ workflow LONGREADANALYSIS {
 
         )
 
-        // capturing aligned reads
+        // capturing aligned reads and converting to fastq
         SAMTOOLS_FASTQ_MAPPED (
 
             SAMTOOLS_QUALITY_FILTER.out.bam,
@@ -302,14 +342,23 @@ workflow LONGREADANALYSIS {
         )
 
         // using bbmap suite to remove empty reads and deduplicate aligned reads
-        BBMAP_REFORMAT_CLEAN_MAPPED (
+        //bbmap dedup has been removing reads with unqiue names - which is unexpected. So we're going to skip this by default
+        if (!params.skip_bbmap_dedup) {
 
-            SAMTOOLS_FASTQ_MAPPED.out.fastq
+            BBMAP_REFORMAT_CLEAN_MAPPED (
 
-        )
+                SAMTOOLS_FASTQ_MAPPED.out.fastq
 
-        // setting filtered_reads channel equal to aligned reads
-        filtered_reads = BBMAP_REFORMAT_CLEAN_MAPPED.out.fastq
+            )
+
+            // setting filtered_reads channel equal to aligned reads
+            filtered_reads = BBMAP_REFORMAT_CLEAN_MAPPED.out.fastq
+
+        } else {
+
+            filtered_reads = SAMTOOLS_FASTQ_MAPPED.out.fastq
+
+        }
 
         // running nanoplot again to compare read stat pre and post filter
         NANOPLOT_ALIGNMENT_TAXON_FILTERED (

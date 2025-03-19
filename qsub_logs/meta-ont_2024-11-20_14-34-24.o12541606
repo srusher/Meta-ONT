@@ -1,0 +1,439 @@
+N E X T F L O W  ~  version 23.10.0
+Launching `main.nf` [big_bernard] DSL2 - revision: ca299dfd93
+WARN: Access to undefined parameter `fasta` -- Initialise it to a default value eg. `params.fasta = some_value`
+WARN: The following invalid input values have been detected:
+
+* --read_type: nanopore
+* --meta_sample: true
+* --skip_subsample: false
+* --skip_porechop: true
+* --skip_metamaps: true
+* --skip_nonpareil: true
+* --skip_alignment_based_filtering: false
+* --skip_fastq_screen: true
+* --skip_kraken2: true
+* --skip_kraken2_parse_reads_by_taxon: true
+* --skip_kraken2_protein: true
+* --skip_filter_by_kraken2_protein: true
+* --skip_assembly: true
+* --skip_medaka: true
+* --skip_binning: true
+* --skip_blast: true
+* --num_subsamples: 100
+* --chopper_q: 20
+* --chopper_min_len: 1000
+* --chopper_max_len: 2147483647
+* --metamaps_db: /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/metamaps/databases/refseq_complete
+* --metamaps_threads: 32
+* --metamaps_mem: 250
+* --kraken_db_main: /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/kraken-db/bact_arch_vir_fungi_amoeba-DB_41-mer
+* --kraken_db_protein: /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/kraken-db/protein_alanine_tRNA_ligase
+* --kraken_tax_ids: /scicomp/home-pure/rtq0/EMEL/projects/long-read-analysis/assets/tax_ids_acanth-verm-naegleria.txt
+* --kraken_conf: false
+* --fastq_screen_conf: /scicomp/home-pure/rtq0/EMEL/projects/long-read-analysis/assets/fastq_screen.conf
+* --assembler: flye
+* --minimap2_meta: all-amoeba
+* --minimap2_index: /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/minimap2/index/a_castellani_neff.mmi
+* --minimap2_mismatch_penalty: 4
+* --seq2tax_map: /scicomp/home-pure/rtq0/EMEL-GWA/Projects/Long_Read_Analysis/data/kraken-db/bact_arch_vir_fungi_amoeba-DB_41-mer/seqid2taxid.map
+* --tax_ids: /scicomp/home-pure/rtq0/EMEL/projects/long-read-analysis/assets/tax_ids_acanth-verm-naegleria.txt
+* --mapping_quality: 10
+* --quast_ref: /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/reference/bacteria_refseq.fna
+* --blast_db: /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/Projects/Long_Read_Analysis/data/blast/arch-bact-fung-hum-amoeba_refseq/arch-bact-fung-hum-amoeba_refseq
+* --blast_evalue: 1e-10
+* --blast_perc_identity: 95
+* --blast_target_seqs: 5
+* --igenomes_ignore: true
+* --chopper_args: --quality 20 --minlength 1000 --maxlength 2147483647
+* --kraken_args: --minimum-hit-groups 2
+* --spades_args: --meta
+* --flye_args: --meta --read-error 0.03
+* --minimap2_args: -I30G -B 4 --secondary=no --split-prefix temp -a
+
+
+
+
+------------------------------------------------------
+  Meta-ONT v1.0dev
+------------------------------------------------------
+Core Nextflow options
+  runName        : big_bernard
+  containerEngine: singularity
+  launchDir      : /scicomp/home-pure/rtq0/EMEL/projects/long-read-analysis
+  workDir        : /scicomp/scratch/rtq0/nextflow
+  projectDir     : /scicomp/home-pure/rtq0/EMEL/projects/long-read-analysis
+  userName       : rtq0
+  profile        : singularity,local
+  configFiles    : 
+
+Input/output options
+  input          : assets/samplesheets/New-Mexico/2024-09_NM-rapid-pcr/samplesheet_barcodes1-8_dorado.csv
+  outdir         : results/New-Mexico/2024-09_NM-rapid-pcr/test
+
+Max job request options
+  max_cpus       : 20
+  max_memory     : 300.GB
+  max_time       : 300.h
+
+!! Only displaying parameters that differ from the pipeline defaults !!
+------------------------------------------------------
+If you use Meta-ONT for your analysis please cite:
+
+* The nf-core framework
+  https://doi.org/10.1038/s41587-020-0439-x
+
+* Software dependencies
+  https://github.com/Meta-ONT/blob/master/CITATIONS.md
+
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (1)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (6)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[cf/83230c] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 8
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (7)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[6b/ca5f22] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 8
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (8)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[00/fb78c6] process > EMEL_LONGREADANALYSIS:LONGR... [ 12%] 1 of 8
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (9)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[af/fc397a] process > EMEL_LONGREADANALYSIS:LONGR... [ 25%] 2 of 8
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 2
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 2
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (10)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[af/fc397a] process > EMEL_LONGREADANALYSIS:LONGR... [ 37%] 3 of 8
+[e5/05c624] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (11)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[50/35ebac] process > EMEL_LONGREADANALYSIS:LONGR... [ 50%] 4 of 8
+[e5/05c624] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[8a/8f671d] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (11)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[50/35ebac] process > EMEL_LONGREADANALYSIS:LONGR... [ 50%] 4 of 8
+[e5/05c624] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[8a/8f671d] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (12)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[50/35ebac] process > EMEL_LONGREADANALYSIS:LONGR... [ 50%] 4 of 8
+[ab/013bbe] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[8a/8f671d] process > EMEL_LONGREADANALYSIS:LONGR... [ 25%] 1 of 4
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (14)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[f0/f36979] process > EMEL_LONGREADANALYSIS:LONGR... [ 75%] 6 of 8
+[ab/013bbe] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 6
+[d4/eea57b] process > EMEL_LONGREADANALYSIS:LONGR... [ 16%] 1 of 6
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (16)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[f0/f36979] process > EMEL_LONGREADANALYSIS:LONGR... [ 75%] 6 of 8
+[02/9a8582] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 6
+[d4/eea57b] process > EMEL_LONGREADANALYSIS:LONGR... [ 50%] 3 of 6
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (17)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[f0/f36979] process > EMEL_LONGREADANALYSIS:LONGR... [ 75%] 6 of 8
+[e5/05c624] process > EMEL_LONGREADANALYSIS:LONGR... [ 16%] 1 of 6
+[96/bfdef7] process > EMEL_LONGREADANALYSIS:LONGR... [ 50%] 3 of 6
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (18)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[f0/f36979] process > EMEL_LONGREADANALYSIS:LONGR... [ 75%] 6 of 8
+[ab/013bbe] process > EMEL_LONGREADANALYSIS:LONGR... [ 33%] 2 of 6
+[96/bfdef7] process > EMEL_LONGREADANALYSIS:LONGR... [ 50%] 3 of 6
+[cf/245059] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 3
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (19)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[f0/f36979] process > EMEL_LONGREADANALYSIS:LONGR... [ 75%] 6 of 8
+[ab/013bbe] process > EMEL_LONGREADANALYSIS:LONGR... [ 33%] 2 of 6
+[96/bfdef7] process > EMEL_LONGREADANALYSIS:LONGR... [ 66%] 4 of 6
+[cf/245059] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[eb/af43d1] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE
+
+executor >  local (20)
+[fb/582073] process > EMEL_LONGREADANALYSIS:LONGR... [100%] 1 of 1 ✔
+[f0/f36979] process > EMEL_LONGREADANALYSIS:LONGR... [ 75%] 6 of 8
+[ab/013bbe] process > EMEL_LONGREADANALYSIS:LONGR... [ 33%] 2 of 6
+[a6/5560f4] process > EMEL_LONGREADANALYSIS:LONGR... [ 66%] 4 of 6
+[cf/245059] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 4
+[eb/af43d1] process > EMEL_LONGREADANALYSIS:LONGR... [ 25%] 1 of 4
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... [  0%] 0 of 1
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+[-        ] process > EMEL_LONGREADANALYSIS:LONGR... -
+WARN: There's no process matching config selector: ALIGN_ASSEMBLY
+WARN: There's no process matching config selector: COVERAGE

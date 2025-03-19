@@ -1,6 +1,7 @@
 process SAMTOOLS_STATS {
     tag "$meta.id"
     label 'process_low'
+    errorStrategy 'ignore'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/samtools:1.19.2--h50ea8bc_0' :
@@ -10,7 +11,7 @@ process SAMTOOLS_STATS {
     tuple val(meta), path(input)
 
     output:
-    tuple val(meta), path("*.txt")      , optional:true, emit: fastq
+    tuple val(meta), path("*.txt")      , optional:true, emit: txt
     path  "versions.yml"                           , emit: versions
 
     when:
