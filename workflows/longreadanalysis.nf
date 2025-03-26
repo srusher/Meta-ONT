@@ -95,6 +95,7 @@ include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_UNMAPPED } from '../modules/loc
 include { BBMAP_REFORMAT as BBMAP_REFORMAT_CLEAN_MAPPED   } from '../modules/local/bbmap_reformat'
 include { PARSE_READS_BY_TAXON                            } from '../modules/local/parse_reads_by_taxon'
 include { KRAKEN_ALIGNMENT_COMPARISON                     } from '../modules/local/alignment_and_kraken_comparison'
+include { ALIGNMENT_CLASSIFICATION_GRAPH                  } from '../modules/local/alignment_classification_graph'
 include { SPADES                                          } from '../modules/local/spades'
 include { UNZIP                                           } from '../modules/local/unzip'
 include { UNZIP as UNZIP_POLISHED                         } from '../modules/local/unzip'
@@ -463,11 +464,19 @@ workflow LONGREADANALYSIS {
 
 
     //if kraken2 and custom alignment are both used for classification then compare the results
-    if (!params.skip_kraken2 && !params.skip_alignment_based_filtering) {
+    if (!params.skip_kraken2 && !params.skip_alignment_based_filtering && !params.non_standard_reference) {
 
         KRAKEN_ALIGNMENT_COMPARISON (
 
             KRAKEN2_MAIN.out.report.join(ALIGNMENT_CLASSIFY.out.summary_tsv)
+
+        )
+
+    } else if (!params.skip_alignment_based_filtering) {
+
+        ALIGNMENT_CLASSIFICATION_GRAPH (
+
+            ALIGNMENT_CLASSIFY.out.summary_tsv
 
         )
 

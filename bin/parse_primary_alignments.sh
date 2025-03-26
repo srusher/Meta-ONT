@@ -8,6 +8,7 @@ filter_alignment_by_id=$5
 tax_ids_i_want=$6
 part=$7
 prefix=$8
+non_standard_reference=$9
 
 declare -A taxa #creating dictionary to count the number of primary alignments present for each taxa 
 num_classified_reads=0
@@ -29,7 +30,16 @@ while IFS= read -r line; do #looping through each alignment in sam file
 
         read_id=$(echo $line | awk '{print $1}')
         seq_id=$(echo $line | awk '{print $3}') #grabbing value of the reference the read aligned to
-        tax_id=$(grep "$seq_id" $seqid2taxid | cut -f2 ) #converting reference seq id to tax id using a modified seqid2taxid conversion file I stole from kraken2 - modified by replacing all strain tax IDs with parent species tax IDs
+
+        if [[ $non_standard_reference == "true" ]]; then #if we're using a non-standard reference then there probably won't be a known sequence ID annotated in the fasta
+
+            tax_id=$seq_id
+
+        else
+
+            tax_id=$(grep "$seq_id" $seqid2taxid | cut -f2 ) #converting reference seq id to tax id using a modified seqid2taxid conversion file I stole from kraken2 - modified by replacing all strain tax IDs with parent species tax IDs
+        
+        fi
 
         if [[ -n $tax_id ]]; then
 

@@ -24,7 +24,7 @@ process ALIGNMENT_CLASSIFY {
     """
     total_reads=\$(grep "Number of reads:" $nanostats | rev | awk '{print \$1}' | rev | cut -d '.' -f1 | tr -d ',')
 
-    bash "${projectDir}/bin/alignment_classify.sh" $prefix $bam $seq2tax_map $filter_alignment_by_id $my_tax_ids $include_children ${params.ncbi_taxonomy_nodes} ${params.ncbi_taxonomy_names} \$total_reads ${projectDir} ${params.local_nodes_db}
+    bash "${projectDir}/bin/alignment_classify.sh" $prefix $bam $seq2tax_map $filter_alignment_by_id $my_tax_ids $include_children ${params.ncbi_taxonomy_nodes} ${params.ncbi_taxonomy_names} \$total_reads ${projectDir} ${params.local_nodes_db} ${params.non_standard_reference}
 
     """
 

@@ -13,6 +13,7 @@ taxa_names=$8
 total_reads=$9
 project_dir=${10}
 nodes_sqlite=${11}
+non_standard_reference=${12}
 
 # Determining child nodes based on parent tax ID provided
 if [[ "$filter_alignment_by_id" == "true" && "$include_children" == "true" ]]; then
@@ -96,7 +97,7 @@ function parse_sam() {
 
         session_name="parse_sam_$i-$prefix"
 
-        tmux new-session -d -s $session_name "bash $project_dir/bin/parse_primary_alignments.sh $working_dir $sam_chunk $tax_count $seqid2taxid $filter_alignment_by_id $tax_ids_i_want part-$i $prefix"         
+        tmux new-session -d -s $session_name "bash $project_dir/bin/parse_primary_alignments.sh $working_dir $sam_chunk $tax_count $seqid2taxid $filter_alignment_by_id $tax_ids_i_want part-$i $prefix $non_standard_reference"         
     
         # Update the start and finish line numbers for the next chunk
         start=$((start + div + 1))
@@ -114,7 +115,7 @@ parse_sam
 continue_code="false"
 while [[ $continue_code == "false" ]]; do
 
-    if [[ $(tmux list-sessions | cut -d ':' -f1 | grep "parse_sam" | wc -l) -gt 0 ]]; then
+    if [[ $(tmux list-sessions | cut -d ':' -f1 | grep "parse_sam_.*$prefix" | wc -l) -gt 0 ]]; then
 
         sleep 5
     
@@ -188,10 +189,13 @@ singularity exec --bind /scicomp $SAMTOOLS_CONTAINER samtools view -@ 16 -S -b $
 
 
 #printing taxa count to a tsv file
->"$prefix-taxa-count.tsv"
+unclassified_reads=$((total_reads - num_classified_reads))
+unclassified_reads_percent=$(awk "BEGIN {print ($unclassified_reads / $total_reads) * 100}")
+echo -e "unclassified\t$unclassified_reads\t$unclassified_reads_percent" > "$prefix-taxa-count.tsv"
 
 for key in "${!taxa[@]}"; do
-    percent=$(awk "BEGIN {print ${taxa["$key"]} / $total_reads}")
+    percent=$(awk 'BEGIN {printf "%.10f", '"${taxa["$key"]}"' / '"$total_reads"' }')
+    percent=$(awk 'BEGIN {printf "%.10f", '"$percent"' * 100 }')
     echo -e "$key\t${taxa[$key]}\t$percent" >> $prefix-taxa-count.tsv
 done
 
@@ -200,23 +204,28 @@ rm -f $prefix-taxa-count.tsv
 
 
 #converting tax ids to taxa names
->$prefix-alignment-classification-summary.tsv
 
-unclassified_reads=$((total_reads - num_classified_reads))
-unclassified_reads_percent=$(awk "BEGIN {print ($unclassified_reads / $total_reads) * 100}")
-echo -e "unclassified\t$unclassified_reads\t$unclassified_reads_percent" >> $prefix-alignment-classification-summary.tsv
+if [[ $non_standard_reference == "true" ]]; then #if we're using a non-standard reference then the $prefix-taxa-count-by-ID-sorted.tsv file likely does not contain actual tax IDs so we won't be able to convert tax ID to tax name
 
-while IFS= read -r line; do
+    cp $prefix-taxa-count-by-ID-sorted.tsv $prefix-alignment-classification-summary.tsv
 
-    tax_id=$(echo "$line" | awk '{print $1}')
-    taxa_count=$(echo "$line" | awk '{print $2}')
-    percent=$(echo "$line" | awk '{print $3}' | awk '{$1=$1*100; print $0}')
-    taxa_name=$(grep "^$tax_id.[|].*scientific name" $taxa_names | cut -d "|" -f 2 | tr -d '\t') # this line is grabbing the scientific name from the names.dmp taxonomy file
+else
 
-    sed -i "s|$tax_id|$taxa_name|g" $prefix-alignment-classifiedreads.txt # replacing tax id with scientific name in the classified reads file
-    echo -e "$taxa_name\t$taxa_count\t$percent" >> $prefix-alignment-classification-summary.tsv   
+    echo -e "unclassified\t$unclassified_reads\t$unclassified_reads_percent" > $prefix-alignment-classification-summary.tsv
 
-done < $prefix-taxa-count-by-ID-sorted.tsv
+    while IFS= read -r line; do
+
+        tax_id=$(echo "$line" | awk '{print $1}')
+        taxa_count=$(echo "$line" | awk '{print $2}')
+        percent=$(echo "$line" | awk '{print $3}') #| awk '{$1=$1*100; print $0}')
+        taxa_name=$(grep "^$tax_id.[|].*scientific name" $taxa_names | cut -d "|" -f 2 | tr -d '\t') # this line is grabbing the scientific name from the names.dmp taxonomy file
+
+        sed -i "s|$tax_id|$taxa_name|g" $prefix-alignment-classifiedreads.txt # replacing tax id with scientific name in the classified reads file
+        echo -e "$taxa_name\t$taxa_count\t$percent" >> $prefix-alignment-classification-summary.tsv   
+
+    done < $prefix-taxa-count-by-ID-sorted.tsv
+
+fi
 
 # cleaning up temporary files
 rm -f $prefix-part-* 

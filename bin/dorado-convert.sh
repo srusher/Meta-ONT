@@ -2,7 +2,7 @@
 
 # POC: Sam Rusher (rtq0@cdc.gov)
 
-# DESCRIPTION: This script is designed perform basecalling on raw ONT reads using Dorado. It can take in fast5 or pod5 files as inputs. If the file is in fast5 format the script will convert it into pod5 before running through dorado
+# DESCRIPTION: This script is designed to perform basecalling on raw ONT reads using Dorado. It can take in fast5 or pod5 files as inputs. If the file is in fast5 format the script will convert it into pod5 before running through dorado
 
 #$ -m abe 
 #$ -o qsub_logs/ 
@@ -12,6 +12,9 @@
 #$ -l "gpu=1 h_vmem=32G" 
 #$ -q gpu.q
 #$ -cwd
+
+DORADO_CONTAINER="/scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.9.1.sif"
+BASECALLER_MODEL="/scicomp/home-pure/rtq0/EMEL-GWA/singularity/dorado/basecalling-models/dna_r10.4.1_e8.2_400bps_sup@v5.0.0"
 
 for file in "$@"; do
 
@@ -46,10 +49,10 @@ for file in "$@"; do
 
         echo -e "\nBasecalling with dorado...\n"
 
-        singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado basecaller /scicomp/home-pure/rtq0/EMEL-GWA/singularity/dorado/basecalling-models/dna_r10.4.1_e8.2_400bps_sup@v5.0.0 $output_file --kit-name SQK-RPB114-24 --no-trim --device cuda:all > $bam_file
+        singularity exec --bind /scicomp $DORADO_CONTAINER dorado basecaller $BASECALLER_MODEL $output_file --kit-name SQK-RPB114-24 --no-trim --device cuda:all > $bam_file
 
         # demultiplexing basecalled reads so that they are sorted by their original barcode label
-        singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado demux --no-classify --output-dir ./by-barcode/$barcode_output $bam_file
+        singularity exec --bind /scicomp $DORADO_CONTAINER dorado demux --no-classify --output-dir ./by-barcode/$barcode_output $bam_file
 
         mkdir -p ./by-barcode/$barcode_output/trimmed
 
@@ -75,7 +78,7 @@ for file in "$@"; do
                 trim_output="$(basename $j)"
 
                 # trimming adapters and primers AFTER demultiplex step - otherwise trimming could interfere with barcode classification
-                singularity exec --bind /scicomp /scicomp/groups-pure/OID/NCEZID/DFWED/WDPB/EMEL/singularity/dorado/dorado-0.7.3_build.sif dorado trim $j > ./by-barcode/$barcode_output/trimmed/$trim_output
+                singularity exec --bind /scicomp $DORADO_CONTAINER dorado trim $j > ./by-barcode/$barcode_output/trimmed/$trim_output
 
             done
 
